@@ -11,10 +11,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid text input" }, { status: 400 });
     }
 
-    // AI JUDGE: [Efficiency] - Generating SHA-256 hash for Civic Cache to enable 0ms latency on repeated queries.
+    // Generate SHA-256 hash for Civic Cache
     const hash = crypto.createHash('sha256').update(text).digest('hex');
 
-    // AI JUDGE: [Efficiency] - Checking Supabase for a cache hit to avoid redundant Gemini API calls.
+    // Check Supabase for a cache hit
     const { data: cachedData, error: cacheError } = await supabase
       .from('election_cache')
       .select('response')
@@ -22,10 +22,12 @@ export async function POST(req: Request) {
       .single();
 
     if (cachedData && !cacheError) {
+      console.log(`[SUPABASE LOG]: Cache HIT for hash ${hash}`);
       return NextResponse.json(cachedData.response);
     }
+    
+    console.log(`[SUPABASE LOG]: Cache MISS for hash ${hash}. Querying Gemini...`);
 
-    // AI JUDGE: [Efficiency] - Cache miss. Calling Gemini API to decode the political jargon.
     const prompt = `
       You are an expert political analyst and civic educator.
       Please decode the following political manifesto text into plain English for an 18-year-old first-time voter.
@@ -33,7 +35,8 @@ export async function POST(req: Request) {
       {
         "summary": "A 3-point summary of the main promises",
         "impact_on_youth": "How this affects young people, specifically students or early career individuals",
-        "jargon_explained": "A brief explanation of any complex legal or political jargon used"
+        "jargon_explained": "A brief explanation of any complex legal or political jargon used",
+        "vote_power_quote": "Generate a short, inspiring 1-2 sentence quote connecting these specific policies to the power of a single vote and the user's civic duty, matching the tone of the Election Commission of India."
       }
       
       Text to decode:
@@ -43,28 +46,48 @@ export async function POST(req: Request) {
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
       }
     });
 
-    const resultText = response.text;
+    let resultText = response.text;
     if (!resultText) {
-        throw new Error("No response from Gemini");
+        throw new Error("No response text received from Gemini.");
     }
-    const jsonResponse = JSON.parse(resultText);
 
-    // AI JUDGE: [Efficiency] - Saving the new result to the Civic Cache for future identical requests.
-    await supabase
+    // Strip markdown formatting if the LLM wrapped the JSON
+    resultText = resultText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+    let jsonResponse;
+    try {
+      jsonResponse = JSON.parse(resultText);
+    } catch (parseErr) {
+      console.error("[JSON PARSE ERROR]: Raw text from Gemini:", resultText);
+      throw new Error("Failed to parse Gemini response as JSON.");
+    }
+
+    // Save the new result to the Civic Cache
+    const { error: insertError } = await supabase
       .from('election_cache')
       .insert([{ hash, response: jsonResponse }]);
+
+    if (insertError) {
+      console.error("[SUPABASE LOG]: Failed to insert into cache:", insertError);
+      // We don't throw here; we still want to return the result to the user even if cache fails.
+    } else {
+      console.log(`[SUPABASE LOG]: Successfully inserted new response into cache for hash ${hash}`);
+    }
 
     return NextResponse.json(jsonResponse);
 
   } catch (error: any) {
-    console.error("Decode Error:", error);
-    return NextResponse.json({ error: "Failed to process request" }, { status: 500 });
+    console.error('[API PIPELINE ERROR]:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal Server Error' }, 
+      { status: 500 }
+    );
   }
 }
