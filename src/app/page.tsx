@@ -1,101 +1,80 @@
-import Image from "next/image";
+import React from 'react';
+import { BookOpen, FileSearch, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 font-sans text-gray-900">
+      {/* Navigation Bar */}
+      <nav className="fixed top-0 w-full z-50 bg-white/60 backdrop-blur-md border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                E
+              </div>
+              <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600">
+                Election.jr
+              </span>
+            </div>
+            <div className="hidden md:flex space-x-8">
+              <a href="#" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Manifesto</a>
+              <a href="#" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Policy Match</a>
+              <a href="#" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Rumor Check</a>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Hero Section */}
+      <main className="pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight">
+            Vote Smart, <br className="hidden md:block"/> Not Just Hard.
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 mb-8">
+            The unbiased civic engine for first-time voters. Decode manifestos, match policies blindly, and bust WhatsApp myths in seconds.
+          </p>
+          <button className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transform hover:-translate-y-0.5 transition-all">
+            Get Started
+          </button>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Feature 1: Manifesto Decoder */}
+          <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all flex flex-col items-start group">
+            <div className="w-14 h-14 rounded-2xl bg-blue-100/50 flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
+              <FileSearch size={28} />
+            </div>
+            <h3 className="text-2xl font-bold mb-3 text-gray-800">Manifesto Decoder</h3>
+            <p className="text-gray-600 leading-relaxed flex-grow">
+              Paste heavy political jargon, and let our AI decode it into a simple 3-point summary with real-world impacts on youth.
+            </p>
+          </div>
+
+          {/* Feature 2: Blind Policy Match */}
+          <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all flex flex-col items-start group">
+            <div className="w-14 h-14 rounded-2xl bg-purple-100/50 flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform">
+              <BookOpen size={28} />
+            </div>
+            <h3 className="text-2xl font-bold mb-3 text-gray-800">Blind Policy Match</h3>
+            <p className="text-gray-600 leading-relaxed flex-grow">
+              Swipe yes/no on anonymous policy promises. We'll reveal which party actually aligns with your views, removing brand bias.
+            </p>
+          </div>
+
+          {/* Feature 3: Rumor Debunker */}
+          <div className="bg-white/40 backdrop-blur-xl border border-white/60 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all flex flex-col items-start group">
+            <div className="w-14 h-14 rounded-2xl bg-cyan-100/50 flex items-center justify-center text-cyan-600 mb-6 group-hover:scale-110 transition-transform">
+              <ShieldCheck size={28} />
+            </div>
+            <h3 className="text-2xl font-bold mb-3 text-gray-800">Rumor Debunker</h3>
+            <p className="text-gray-600 leading-relaxed flex-grow">
+              Paste a viral political rumor. We cross-reference it against facts to instantly tell you if it's true, false, or misleading.
+            </p>
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
