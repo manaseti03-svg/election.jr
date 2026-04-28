@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Check, X, Trophy } from 'lucide-react';
 
@@ -9,7 +9,8 @@ type Party = 'Progressive' | 'Conservative' | 'Libertarian' | 'Centrist';
 interface Policy {
   id: number;
   text: string;
-  party: Party;
+  party?: Party;
+  alignment?: string;
 }
 
 const INITIAL_POLICIES: Policy[] = [
@@ -105,7 +106,8 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
 
   const handleSwipe = (direction: 'left' | 'right') => {
     if (direction === 'right') {
-      const alignment = activeCard.alignment || activeCard.party || 'Other';
+      const activeCard = cards[activeCardIndex];
+      const alignment = activeCard?.alignment || activeCard?.party || 'Other';
       setScores(prev => ({
         ...prev,
         [alignment]: (prev[alignment] || 0) + 1
@@ -166,12 +168,12 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
               transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
               className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full mb-4"
             />
-            <p className="text-slate-600 font-bold animate-pulse">Scanning current political climate in {voterProfile?.location}...</p>
+            <p className="text-slate-600 font-bold animate-pulse">Analyzing political climate in {voterProfile?.location}...</p>
           </div>
         )}
 
         <AnimatePresence>
-          {!isLoading && !isFinished && cards.map((policy, index) => {
+          {!isLoading && cards.length > 0 && cards.map((policy, index) => {
             const isTop = index === activeCardIndex;
 
             return (

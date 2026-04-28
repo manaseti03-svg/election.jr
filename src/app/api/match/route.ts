@@ -11,8 +11,7 @@ export async function POST(req: Request) {
 
     const { location, ageGroup, gender, sector } = voterProfile;
     
-    // Create a dynamic prompt combining all available profile traits
-    const prompt = `You are a neutral civic educator. The user is a ${gender} in the ${ageGroup} demographic, working as a ${sector}, located in ${location}. Generate 5 highly relevant, currently debated political policies tailored SPECIFICALLY to the socioeconomic priorities of this exact profile in this region. Return strictly as JSON.`;
+    const prompt = `You are an expert in Indian State-Level politics. The user is a ${gender} ${sector} in the ${ageGroup} age bracket living in ${location}, India. Generate 5 highly debated, hyper-local political policies relevant to THIS EXACT DEMOGRAPHIC. Rule 1: DO NOT use American concepts (e.g., Federal, Congress, student debt). Rule 2: Focus on Indian state realities (e.g., State Public Service Commission exams, IT hubs, fee reimbursement, local infrastructure). Rule 3: Strip away party names. Return strictly as a pure JSON array of objects with keys: id, text, alignment.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -28,19 +27,22 @@ export async function POST(req: Request) {
     }
 
     // Strip markdown formatting if the LLM wrapped the JSON
-    resultText = resultText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+    const cleanedText = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
 
     let jsonResponse;
     try {
-      jsonResponse = JSON.parse(resultText);
+      jsonResponse = JSON.parse(cleanedText);
+      if (!Array.isArray(jsonResponse)) throw new Error("Not an array");
     } catch (parseErr) {
       console.error("[JSON PARSE ERROR]: Raw text from Gemini:", resultText);
-      throw new Error("Failed to parse Gemini response as JSON.");
-    }
-
-    // Ensure the response is an array
-    if (!Array.isArray(jsonResponse)) {
-        throw new Error("Gemini response is not an array of objects.");
+      const FALLBACK_POLICIES = [
+        { id: 1, text: "Increase state funding for local public universities and IT hubs.", alignment: "Progressive" },
+        { id: 2, text: "Implement stricter guidelines for State Public Service Commission exams to prevent leaks.", alignment: "Centrist" },
+        { id: 3, text: "Provide fee reimbursement for economically weaker students in professional courses.", alignment: "Progressive" },
+        { id: 4, text: "Prioritize local infrastructure development and road expansion in semi-urban areas.", alignment: "Conservative" },
+        { id: 5, text: "Introduce subsidies for young entrepreneurs starting businesses in rural sectors.", alignment: "Centrist" }
+      ];
+      return NextResponse.json(FALLBACK_POLICIES);
     }
 
     return NextResponse.json(jsonResponse);

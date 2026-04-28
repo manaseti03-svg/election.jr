@@ -5,6 +5,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { FileSearch, Sparkles, AlertCircle, CheckCircle2, Megaphone } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import BlindMatch, { VoterProfile } from '@/components/BlindMatch';
+import Debunker from '@/components/Debunker';
 
 const LOADING_FACTS = [
   'Analyzing policies...',
@@ -29,8 +30,22 @@ export default function Home() {
   const [tempProfile, setTempProfile] = useState({
     location: '',
     ageGroup: '',
-    gender: ''
+    gender: '',
+    sector: ''
   });
+
+  const getSectorOptions = () => {
+    switch (tempProfile.ageGroup) {
+      case '18-25 (Youth)':
+        return ['Student', 'Early Career/Working', 'Job Seeker', 'Entrepreneur'];
+      case '26-50 (Adult)':
+        return ['Employed', 'Business Owner', 'Freelancer', 'Unemployed/Looking'];
+      case '50+ (Senior)':
+        return ['Employed', 'Business Owner', 'Retired'];
+      default:
+        return [];
+    }
+  };
 
   // Phase 2: Global 3D Cursor Tracking Effect
   const cursorX = useMotionValue(0);
@@ -151,7 +166,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-hidden relative font-sans text-slate-900 selection:bg-blue-200">
-
       {/* Opal Glass Dynamic Background Gradient */}
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-50 via-white to-cyan-50 z-0" />
 
@@ -180,7 +194,7 @@ export default function Home() {
             </div>
             {voterProfile && (
               <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 shadow-sm">
-                📍 {voterProfile.location} | {voterProfile.ageGroup.split(' ')[0]} | {voterProfile.gender.charAt(0)}
+                📍 {voterProfile.location} | {voterProfile.ageGroup.split(' ')[0]} | {voterProfile.gender.charAt(0)} | {voterProfile.sector}
               </div>
             )}
             <div className="hidden md:flex space-x-8 text-sm font-semibold text-slate-500">
@@ -256,14 +270,29 @@ export default function Home() {
                   </select>
                 </div>
 
+                {tempProfile.ageGroup && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Sector / Occupation</label>
+                    <select
+                      value={tempProfile.sector}
+                      onChange={(e) => setTempProfile({ ...tempProfile, sector: e.target.value })}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium appearance-none"
+                      style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 1rem center", backgroundRepeat: "no-repeat", backgroundSize: "1.5em 1.5em" }}
+                    >
+                      <option value="" disabled>Select Sector...</option>
+                      {getSectorOptions().map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </motion.div>
+                )}
+
                 <button
                   onClick={() => {
-                    if (tempProfile.location && tempProfile.ageGroup && tempProfile.gender) {
+                    if (tempProfile.location && tempProfile.ageGroup && tempProfile.gender && tempProfile.sector) {
                       setVoterProfile(tempProfile);
                       setIsLocationModalOpen(false);
                     }
                   }}
-                  disabled={!(tempProfile.location && tempProfile.ageGroup && tempProfile.gender)}
+                  disabled={!(tempProfile.location && tempProfile.ageGroup && tempProfile.gender && tempProfile.sector)}
                   className="w-full mt-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-4 text-white font-bold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Unlock Election.jr
@@ -275,7 +304,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className={\`relative z-20 pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex flex-col items-center \${!voterProfile ? 'blur-sm pointer-events-none' : ''}\`}>
+      <main className={`relative z-20 pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex flex-col items-center ${!voterProfile ? 'blur-sm pointer-events-none' : ''}`}>
 
       {activeView === 'decoder' && (
         <div className="w-full flex flex-col items-center">
@@ -448,13 +477,8 @@ export default function Home() {
 
       {activeView === 'match' && <BlindMatch voterProfile={voterProfile} />}
 
-      {activeView === 'debunker' && (
-        <div className="mt-24 text-center">
-          <h2 className="text-4xl font-extrabold text-slate-800 drop-shadow-sm mb-4">WhatsApp Rumor Debunker</h2>
-          <p className="text-lg text-slate-600 font-medium">Coming soon in Phase 3...</p>
-        </div>
-      )}
+      {activeView === 'debunker' && <Debunker voterProfile={voterProfile} />}
     </main>
-    </div >
+    </div>
   );
 }
