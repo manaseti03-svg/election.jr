@@ -21,8 +21,8 @@ Users paste heavy political jargon, and our AI engine instantly outputs a simpli
 ### 2. Blind Policy Match (Live)
 A "Tinder-style" gamified swipe interface. Instead of static content, the engine dynamically pings Gemini with the user's exact profile to generate hyper-local, currently debated policies in their specific Indian state. Users swipe right (Agree) or left (Disagree). By stripping away party labels, users discover which political ideology they *actually* align with based purely on their socioeconomic priorities.
 
-### 3. The WhatsApp Debunker (Upcoming)
-An AI verification tool to cross-reference viral political rumors against verified facts. The AI will fact-check using the lens of the registered Voter Profile to provide highly relevant context.
+### 3. The WhatsApp Debunker (Live)
+An AI verification tool built to cross-reference viral political rumors against verified facts. By piping the user's exact 4-part Voter Profile (Location, Age, Gender, Sector) into the prompt, the AI generates a `truth_score` and dynamic verdict colors, while explicitly detailing the **Targeting Motive**—explaining *why* this specific demographic was targeted by the misinformation.
 
 ---
 
@@ -32,7 +32,7 @@ Election.jr is not just an API wrapper; it features a resilient, highly-optimize
 
 * **Frontend Framework:** Next.js 14 (App Router) with React & TypeScript.
 * **UI/UX & Physics:** Tailwind CSS & Framer Motion. Features an ultra-premium "Opal Glass" 3D aesthetic, interactive mouse-tracking, and a sleek 4-step dynamic onboarding modal (State, Age, Gender, Sector).
-* **Backend Pipeline:** Next.js Serverless API Routes (`/api/decode` & `/api/match`) wrapped in bulletproof try/catch blocks with aggressive Markdown stripping to prevent LLM hallucination crashes.
+* **Backend Pipeline:** Next.js Serverless API Routes (`/api/decode`, `/api/match`, & `/api/debunker`) wrapped in bulletproof try/catch blocks with aggressive Markdown stripping and JSON fallback arrays to prevent LLM hallucination crashes.
 * **The AI Engine:** Google Generative AI (Gemini Flash) strictly prompted to act as a localized civic educator. Prompts are aggressively tuned to inject the user's exact demographic context.
 * **The "Civic Cache" (Database):** Supabase (PostgreSQL). Secured via Service Role bypassing client-side RLS.
 
