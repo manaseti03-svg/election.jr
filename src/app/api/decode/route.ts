@@ -5,11 +5,13 @@ import { ai } from '@/lib/gemini';
 
 export async function POST(req: Request) {
   try {
-    const { text } = await req.json();
+    const { text, voterProfile } = await req.json();
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: "Invalid text input" }, { status: 400 });
     }
+    
+    const { location, ageGroup, gender, sector } = voterProfile || {};
 
     // Generate SHA-256 hash for Civic Cache
     const hash = crypto.createHash('sha256').update(text).digest('hex');
@@ -30,14 +32,16 @@ export async function POST(req: Request) {
 
     const prompt = `
       You are an expert political analyst and civic educator.
-      Please decode the following political manifesto text into plain English for an 18-year-old first-time voter.
+      Please decode the following political manifesto text into plain English for an everyday voter.
       Format the output strictly as a JSON object with the following structure:
       {
         "summary": "A 3-point summary of the main promises",
-        "impact_on_youth": "How this affects young people, specifically students or early career individuals",
+        "demographic_impact": "How this affects the specific demographic based on the crucial context provided",
         "jargon_explained": "A brief explanation of any complex legal or political jargon used",
         "vote_power_quote": "Generate a short, inspiring 1-2 sentence quote connecting these specific policies to the power of a single vote and the user's civic duty, matching the tone of the Election Commission of India."
       }
+      
+      Crucial Context: The user is a ${gender} in the ${ageGroup} demographic, currently a ${sector}, from ${location}. Explain exactly how these policies directly affect their daily routine, career prospects, and finances. Hyper-focus on their occupation and age.
       
       Text to decode:
       """

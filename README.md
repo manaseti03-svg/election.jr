@@ -2,7 +2,7 @@
 
 **The AI-Powered Civic Engine for First-Time Voters.**
 
-Built for the **Hack2Skill** challenge, Election.jr is a high-tier civic education platform designed specifically to combat voter apathy among youth. It slices through 50-page political manifestos, removes party bias, and debunks misinformation using a highly optimized, AI-driven architecture.
+Built for the **Hack2Skill** challenge, Election.jr is a high-tier, demographic-aware civic education platform designed to combat voter apathy. It uses a custom **Constituency Engine** to capture a 4-part user profile (Location, Age Group, Gender, Sector), slicing through 50-page political manifestos and dynamically tailoring AI-generated policies strictly to the user's socioeconomic priorities.
 
 ---
 
@@ -14,15 +14,15 @@ First-time voters want to make informed decisions, but official political manife
 ### 1. The Manifesto Decoder (Live)
 Users paste heavy political jargon, and our AI engine instantly outputs a simplified JSON payload containing:
 * **Summary:** The core policy in plain English.
-* **Impact on Youth:** Exactly how it affects 18-to-25-year-olds.
+* **Demographic Impact:** Exactly how it affects their daily routine, finances, and career, hyper-focused on their age, gender, and sector.
 * **Jargon Explained:** Definitions for complex legal/political terms.
 * **ECI-Style Social Impact:** A dynamic, inspiring quote tying the policy to the power of a single vote, mirroring the Election Commission of India's SVEEP initiatives.
 
-### 2. Blind Policy Match (In Progress)
-A "Tinder-style" gamified swipe interface. Users are presented with anonymous policy promises and swipe right (Agree) or left (Disagree). By stripping away party labels, users discover which political ideology they *actually* align with based purely on the issues.
+### 2. Blind Policy Match (Live)
+A "Tinder-style" gamified swipe interface. Instead of static content, the engine dynamically pings Gemini with the user's exact profile to generate hyper-local, currently debated policies in their specific Indian state. Users swipe right (Agree) or left (Disagree). By stripping away party labels, users discover which political ideology they *actually* align with based purely on their socioeconomic priorities.
 
 ### 3. The WhatsApp Debunker (Upcoming)
-An AI verification tool to cross-reference viral political rumors against verified facts.
+An AI verification tool to cross-reference viral political rumors against verified facts. The AI will fact-check using the lens of the registered Voter Profile to provide highly relevant context.
 
 ---
 
@@ -31,9 +31,9 @@ An AI verification tool to cross-reference viral political rumors against verifi
 Election.jr is not just an API wrapper; it features a resilient, highly-optimized full-stack pipeline designed for 0ms latency and minimal AI compute costs.
 
 * **Frontend Framework:** Next.js 14 (App Router) with React & TypeScript.
-* **UI/UX & Physics:** Tailwind CSS & Framer Motion. Features an ultra-premium "Opal Glass" 3D aesthetic with interactive mouse-tracking, physics-based drag constraints for the swipe game, and dynamic loading states to mask API latency.
-* **Backend Pipeline:** Next.js Serverless API Route (`/api/decode`) wrapped in a bulletproof try/catch block with aggressive Markdown stripping to prevent LLM hallucination crashes.
-* **The AI Engine:** Google Generative AI (Gemini Flash) strictly prompted to act as a civic educator and return formatted JSON.
+* **UI/UX & Physics:** Tailwind CSS & Framer Motion. Features an ultra-premium "Opal Glass" 3D aesthetic, interactive mouse-tracking, and a sleek 4-step dynamic onboarding modal (State, Age, Gender, Sector).
+* **Backend Pipeline:** Next.js Serverless API Routes (`/api/decode` & `/api/match`) wrapped in bulletproof try/catch blocks with aggressive Markdown stripping to prevent LLM hallucination crashes.
+* **The AI Engine:** Google Generative AI (Gemini Flash) strictly prompted to act as a localized civic educator. Prompts are aggressively tuned to inject the user's exact demographic context.
 * **The "Civic Cache" (Database):** Supabase (PostgreSQL). Secured via Service Role bypassing client-side RLS.
 
 ### ⚡ The 0ms Latency Data Flow
