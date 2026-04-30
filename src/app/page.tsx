@@ -34,7 +34,8 @@ export default function Home() {
     location: '',
     ageGroup: '',
     gender: '',
-    sector: ''
+    sector: '',
+    voterStatus: ''
   });
 
   const getSectorOptions = () => {
@@ -289,9 +290,26 @@ export default function Home() {
                   </motion.div>
                 )}
 
+                {tempProfile.sector && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Current Voter Status</label>
+                    <select
+                      value={tempProfile.voterStatus}
+                      onChange={(e) => setTempProfile({ ...tempProfile, voterStatus: e.target.value })}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium appearance-none"
+                      style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 1rem center", backgroundRepeat: "no-repeat", backgroundSize: "1.5em 1.5em" }}
+                    >
+                      <option value="" disabled>Select Status...</option>
+                      <option value="unregistered">I need to register for the first time</option>
+                      <option value="registered">I already have a Voter ID</option>
+                      <option value="pending">I applied and am waiting for approval</option>
+                    </select>
+                  </motion.div>
+                )}
+
                 <button
                   onClick={() => {
-                    if (tempProfile.location && tempProfile.ageGroup && tempProfile.gender && tempProfile.sector) {
+                    if (tempProfile.location && tempProfile.ageGroup && tempProfile.gender && tempProfile.sector && tempProfile.voterStatus) {
                       setVoterProfile(tempProfile);
                       setIsLocationModalOpen(false);
                       

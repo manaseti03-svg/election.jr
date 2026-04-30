@@ -16,9 +16,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid voterProfile input" }, { status: 400 });
     }
 
-    const { location, ageGroup, gender, sector } = voterProfile;
+    const { location, ageGroup, gender, sector, voterStatus = 'unregistered' } = voterProfile;
     
-    const prompt = `You are an expert in Indian State-Level politics. The user is a ${gender} ${sector} in the ${ageGroup} age bracket living in ${location}, India. Generate 5 highly debated, hyper-local political policies relevant to THIS EXACT DEMOGRAPHIC. Rule 1: DO NOT use American concepts (e.g., Federal, Congress, student debt). Rule 2: Focus on Indian state realities (e.g., State Public Service Commission exams, IT hubs, fee reimbursement, local infrastructure). Rule 3: Strip away party names. Return strictly as a pure JSON array of objects with keys: id, text, alignment.`;
+    const prompt = `You are an expert in Indian State-Level politics. The user is a ${gender} ${sector} in the ${ageGroup} age bracket living in ${location}, India. Their current voter registration status is '${voterStatus}'. Rule 1: DO NOT use American concepts (e.g., Federal, Congress, student debt). Rule 2: Focus on Indian state realities (e.g., State Public Service Commission exams, IT hubs, fee reimbursement, local infrastructure). Rule 3: Strip away party names. Return strictly as a pure JSON array of objects with keys: id, text, alignment.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',

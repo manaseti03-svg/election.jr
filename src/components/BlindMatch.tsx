@@ -26,6 +26,7 @@ export interface VoterProfile {
   ageGroup: string;
   gender: string;
   sector?: string;
+  voterStatus?: string;
 }
 
 interface BlindMatchProps {

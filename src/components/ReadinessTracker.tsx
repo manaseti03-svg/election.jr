@@ -4,31 +4,63 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Circle, ExternalLink } from 'lucide-react';
 
-export default function ReadinessTracker() {
+interface ReadinessTrackerProps {
+  voterStatus?: string;
+}
+
+export default function ReadinessTracker({ voterStatus = 'unregistered' }: ReadinessTrackerProps) {
   const [docs, setDocs] = useState({
-    aadhaar: false,
-    photo: false,
-    address: false
+    item1: false,
+    item2: false,
+    item3: false
   });
 
+  const isRegistered = voterStatus === 'registered';
+  const isPending = voterStatus === 'pending';
+  const totalItems = isPending ? 2 : 3;
+
   const activeCount = Object.values(docs).filter(Boolean).length;
-  const progress = Math.round((activeCount / 3) * 100);
-  const isComplete = progress === 100;
+  const progress = Math.min(Math.round((activeCount / totalItems) * 100), 100);
+  const isComplete = activeCount >= totalItems;
 
   const toggleDoc = (key: keyof typeof docs) => {
     setDocs(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const checklist = [
-    { id: 'aadhaar', label: 'Scanned Aadhaar Card' },
-    { id: 'photo', label: 'Recent Passport Photo (4.5cm x 3.5cm)' },
-    { id: 'address', label: 'Valid Address Proof' }
-  ] as const;
+  let title = 'Form 6 Pre-Flight Checklist';
+  let buttonText = 'Proceed to Official ECI Portal';
+  let buttonLink = 'https://voters.eci.gov.in/';
+  let checklist: any[] = [];
+
+  if (isRegistered) {
+    title = 'Voter Roll Verification Checklist';
+    buttonText = 'Search Electoral Roll';
+    buttonLink = 'https://electoralsearch.eci.gov.in/';
+    checklist = [
+      { id: 'item1', label: 'Verify Your Name: Having a physical card is not enough. You must verify your name is on the current electoral roll.' },
+      { id: 'item2', label: 'Find Your Booth: Note your serial number and exact polling station address.' },
+      { id: 'item3', label: "Missing from Portal?: If your EPIC number shows 'No Record Found', your name was deleted. You must register again using Form 6." }
+    ];
+  } else if (isPending) {
+    title = 'Application Tracking Checklist';
+    buttonText = 'Track Application Status';
+    buttonLink = 'https://voters.eci.gov.in/';
+    checklist = [
+      { id: 'item1', label: 'Find Reference ID: Locate the reference number sent to your SMS/Email when you submitted Form 6.' },
+      { id: 'item2', label: 'Check Status: Enter the ID on the portal to see if your BLO has approved it.' }
+    ];
+  } else {
+    checklist = [
+      { id: 'item1', label: 'Scanned Aadhaar Card' },
+      { id: 'item2', label: 'Recent Passport Photo (4.5cm x 3.5cm)' },
+      { id: 'item3', label: 'Valid Address Proof' }
+    ];
+  }
 
   return (
     <div className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] h-full flex flex-col">
       <h3 className="text-xl md:text-2xl font-extrabold text-slate-800 mb-6">
-        Form 6 Pre-Flight Checklist
+        {title}
       </h3>
 
       {/* Progress Bar */}
@@ -71,7 +103,7 @@ export default function ReadinessTracker() {
 
       {/* Primary Button */}
       <motion.a
-        href={isComplete ? "https://voters.eci.gov.in/" : undefined}
+        href={isComplete ? buttonLink : undefined}
         target={isComplete ? "_blank" : undefined}
         rel="noopener noreferrer"
         animate={
@@ -91,7 +123,7 @@ export default function ReadinessTracker() {
           if (!isComplete) e.preventDefault();
         }}
       >
-        Proceed to Official ECI Portal
+        {buttonText}
         <ExternalLink size={18} className={isComplete ? "text-white" : "text-slate-400"} />
       </motion.a>
     </div>

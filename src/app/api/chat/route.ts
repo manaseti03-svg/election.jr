@@ -20,14 +20,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid voterProfile input" }, { status: 400 });
     }
 
-    const { location, ageGroup, gender, sector } = voterProfile;
+    const { location, ageGroup, gender, sector, voterStatus = 'unregistered' } = voterProfile;
 
     const today = new Date().toDateString();
     const currentYear = new Date().getFullYear();
 
     const historyText = chatHistory.map((msg: any) => `${msg.role}: ${msg.content_english}`).join('\n');
 
-    const prompt = `You are Election.jr, a Troubleshooting Expert and Civic Guide. The user (${gender}, ${ageGroup}, ${sector}, ${location}) is currently looking at the '${currentTab}' section of the app.
+    const prompt = `You are Election.jr, a Troubleshooting Expert and Civic Guide. The user (${gender}, ${ageGroup}, ${sector}, ${location}) is currently looking at the '${currentTab}' section of the app. Their current voter registration status is '${voterStatus}'.
 
 If Guide (Action Plan): Help with edge-case registration issues (mismatched IDs, NRI voting). Do not repeat basic steps.
 If Match (Ideology): Explain what different ideologies (Progressive, Centrist, etc.) mean in India.

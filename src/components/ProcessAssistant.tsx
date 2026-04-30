@@ -120,29 +120,71 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
                 </div>
               </div>
 
-              {/* Pre-Flight Checklist */}
+              {/* Conditionally Rendered Checklist & Button */}
               <div className="ml-[52px] bg-white/60 backdrop-blur-md border border-white rounded-2xl p-6 shadow-sm mt-4">
-                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                  <FileText className="text-blue-600 w-5 h-5" />
-                  Before you click: How to use the ECI Portal
-                </h3>
-                <ul className="space-y-4">
-                  <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
-                    <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                    <span><strong className="text-blue-950">Gather Documents:</strong> Have a scanned copy of your Aadhaar card and a recent passport-size photo ready on your device.</span>
-                  </li>
-                  <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
-                    <MousePointerClick className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                    <span><strong className="text-blue-950">Find Form 6:</strong> Once on the portal, locate and click the option for 'New Voter Registration (Form 6)'.</span>
-                  </li>
-                  <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
-                    <Bookmark className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                    <span><strong className="text-blue-950">Track Your EPIC:</strong> After submitting, you will get a reference ID. Save it to track when your Voter ID is approved.</span>
-                  </li>
-                </ul>
+                {voterProfile?.voterStatus === 'registered' ? (
+                  <>
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <FileText className="text-blue-600 w-5 h-5" />
+                      Voter Roll Verification Checklist
+                    </h3>
+                    <ul className="space-y-4">
+                      <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                        <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <span><strong className="text-blue-950">Verify Your Name:</strong> Having a physical card is not enough. You must verify your name is on the current electoral roll.</span>
+                      </li>
+                      <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                        <MousePointerClick className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <span><strong className="text-blue-950">Find Your Booth:</strong> Note your serial number and exact polling station address.</span>
+                      </li>
+                      <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                        <Bookmark className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <span><strong className="text-blue-950">Missing from Portal?:</strong> If your EPIC number shows 'No Record Found', your name was deleted. You must register again using Form 6.</span>
+                      </li>
+                    </ul>
+                  </>
+                ) : voterProfile?.voterStatus === 'pending' ? (
+                  <>
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <FileText className="text-blue-600 w-5 h-5" />
+                      Application Tracking Checklist
+                    </h3>
+                    <ul className="space-y-4">
+                      <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                        <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <span><strong className="text-blue-950">Find Reference ID:</strong> Locate the reference number sent to your SMS/Email when you submitted Form 6.</span>
+                      </li>
+                      <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                        <MousePointerClick className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <span><strong className="text-blue-950">Check Status:</strong> Enter the ID on the portal to see if your BLO has approved it.</span>
+                      </li>
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <FileText className="text-blue-600 w-5 h-5" />
+                      Before you click: How to use the ECI Portal
+                    </h3>
+                    <ul className="space-y-4">
+                      <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                        <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <span><strong className="text-blue-950">Gather Documents:</strong> Have a scanned copy of your Aadhaar card and a recent passport-size photo ready on your device.</span>
+                      </li>
+                      <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                        <MousePointerClick className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <span><strong className="text-blue-950">Find Form 6:</strong> Once on the portal, locate and click the option for 'New Voter Registration (Form 6)'.</span>
+                      </li>
+                      <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                        <Bookmark className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <span><strong className="text-blue-950">Track Your EPIC:</strong> After submitting, you will get a reference ID. Save it to track when your Voter ID is approved.</span>
+                      </li>
+                    </ul>
+                  </>
+                )}
               </div>
 
-              {/* Voter ID Portal Button (Agentic UI Highlight Target) */}
+              {/* Conditionally Rendered Action Button */}
               <motion.div
                 animate={
                   activeHighlight === 'HIGHLIGHT_REGISTER' 
@@ -157,14 +199,18 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
                 className="rounded-2xl md:ml-[52px] mt-2"
               >
                 <a
-                  href="https://voters.eci.gov.in/"
+                  href={voterProfile?.voterStatus === 'registered' ? "https://electoralsearch.eci.gov.in/" : "https://voters.eci.gov.in/"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="relative group/glow inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0 w-full md:w-auto"
                 >
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 blur-md opacity-0 group-hover/glow:opacity-40 transition-opacity -z-10" />
                   <Landmark size={18} />
-                  I have my documents. Proceed to Official ECI Portal ↗
+                  {voterProfile?.voterStatus === 'registered' 
+                    ? "Search Electoral Roll ↗" 
+                    : voterProfile?.voterStatus === 'pending'
+                    ? "Track Application Status ↗"
+                    : "Proceed to Official ECI Portal ↗"}
                 </a>
               </motion.div>
             </div>
@@ -298,7 +344,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
             SECTION 3: Document Readiness Tracker
            ════════════════════════════════════════════════════════════════ */}
         <motion.div variants={itemVariants}>
-          <ReadinessTracker />
+          <ReadinessTracker voterStatus={voterProfile?.voterStatus} />
         </motion.div>
 
       </motion.div>

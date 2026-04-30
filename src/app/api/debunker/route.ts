@@ -21,9 +21,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid voterProfile input" }, { status: 400 });
     }
 
-    const { location, ageGroup, gender, sector } = voterProfile;
+    const { location, ageGroup, gender, sector, voterStatus = 'unregistered' } = voterProfile;
 
-    const prompt = `You are a premier political fact-checker. The user has received a suspicious political WhatsApp forward. The user is a ${gender} ${sector} in the ${ageGroup} demographic from ${location}. Analyze the text. Return strictly as a JSON object with these keys:
+    const prompt = `You are a premier political fact-checker. The user has received a suspicious political WhatsApp forward. The user is a ${gender} ${sector} in the ${ageGroup} demographic from ${location}. Their current voter registration status is '${voterStatus}'. Analyze the text. Return strictly as a JSON object with these keys:
       truth_score (number 0-100)
       verdict (string: "True", "False", or "Misleading")
       fact_check (string: 2-3 sentences explaining the actual truth)

@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid text input" }, { status: 400 });
     }
     
-    const { location, ageGroup, gender, sector } = voterProfile || {};
+    const { location, ageGroup, gender, sector, voterStatus = 'unregistered' } = voterProfile || {};
 
     // Generate SHA-256 hash for Civic Cache
     const hash = crypto.createHash('sha256').update(text).digest('hex');
@@ -39,9 +39,7 @@ export async function POST(req: Request) {
     console.log(`[SUPABASE LOG]: Cache MISS for hash ${hash}. Querying Gemini...`);
 
     const prompt = `
-      You are an expert political analyst and civic educator.
-      Please decode the following political manifesto text into plain English for an everyday voter.
-      Format the output strictly as a JSON object with the following structure:
+      You are a premier political strategist and legal decoder. The user is a ${gender} ${sector} in the ${ageGroup} demographic from ${location}. Their current voter registration status is '${voterStatus}'. Decode the following political manifesto/policy text into highly accessible, gamified insights. Return strictly as a JSON object with these keys:
       {
         "summary": "A 3-point summary of the main promises",
         "demographic_impact": "How this affects the specific demographic based on the crucial context provided",
