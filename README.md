@@ -1,53 +1,56 @@
-# 🗳️ Election.jr
+# 🗳️ Election.jr | Context-Aware Civic AI 🇮🇳
 
-**The AI-Powered Civic Engine for First-Time Voters.**
+**Live Deployment:** [https://election-jr-158139253158.asia-south1.run.app/](https://election-jr-158139253158.asia-south1.run.app/)
 
-Built for the **Hack2Skill** challenge, Election.jr is a high-tier, demographic-aware civic education platform designed to combat voter apathy. It uses a custom **Constituency Engine** to capture a 4-part user profile (Location, Age Group, Gender, Sector), slicing through 50-page political manifestos and dynamically tailoring AI-generated policies strictly to the user's socioeconomic priorities.
-
----
-
-## 🚨 The Problem
-First-time voters want to make informed decisions, but official political manifestos are written in dense legal jargon. Furthermore, youth political opinions are heavily skewed by biased social media reels and viral rumors rather than actual party policies. This leads to misinformed voting and civic disengagement.
-
-## 🌟 The Solution (Features)
-
-### 1. The Manifesto Decoder (Live)
-Users paste heavy political jargon, and our AI engine instantly outputs a simplified JSON payload containing:
-* **Summary:** The core policy in plain English.
-* **Demographic Impact:** Exactly how it affects their daily routine, finances, and career, hyper-focused on their age, gender, and sector.
-* **Jargon Explained:** Definitions for complex legal/political terms.
-* **ECI-Style Social Impact:** A dynamic, inspiring quote tying the policy to the power of a single vote, mirroring the Election Commission of India's SVEEP initiatives.
-
-### 2. Blind Policy Match (Live)
-A "Tinder-style" gamified swipe interface. Instead of static content, the engine dynamically pings Gemini with the user's exact profile to generate hyper-local, currently debated policies in their specific Indian state. Users swipe right (Agree) or left (Disagree). By stripping away party labels, users discover which political ideology they *actually* align with based purely on their socioeconomic priorities.
-
-### 3. The WhatsApp Debunker (Live)
-An AI verification tool built to cross-reference viral political rumors against verified facts. By piping the user's exact 4-part Voter Profile (Location, Age, Gender, Sector) into the prompt, the AI generates a `truth_score` and dynamic verdict colors, while explicitly detailing the **Targeting Motive**—explaining *why* this specific demographic was targeted by the misinformation.
-
-### 4. Context-Aware Floating Sherpa (Two-Way Voice)
-A globally persistent, Agentic UI Assistant sitting at the bottom right of the screen. Powered by a dynamic prompt, it detects exactly which tab the user is viewing and adjusts its persona (e.g., explaining ideologies in Match, or debugging edge cases in Guide).
-* **Agentic Workflows:** Actively guides users through Form 6 registration via 1-click 'Suggested Action' micro-steps, ending with a deep-link ECI handoff.
-* **Two-Way Voice Engine:** Features native Web Speech API integration. Users can talk to the bot via the Microphone (STT), and the bot responds using a bulletproof Text-to-Speech (TTS) engine that forcefully maps the correct OS regional voice to provide flawless bilingual audio in the user's native language.
+Election.jr is a high-performance, demographically aware civic education platform built for the **PromptWars Virtual H2S Challenge**. While most election bots provide static answers, Election.jr utilizes a Contextual Personalization Engine to adapt its entire UI, roadmap, and AI logic to the specific voter’s age, location, and registration status.
 
 ---
 
-## 🏗️ Technical Architecture & System Design
+## 🚀 Key Innovations (The "Top 1%" Edge)
 
-Election.jr is not just an API wrapper; it features a resilient, highly-optimized full-stack pipeline designed for 0ms latency and minimal AI compute costs.
+### 🧠 Demographic Contextualization
+The application doesn't just "chat." It shape-shifts. Based on a user's profile (e.g., 18-year-old student from Andhra Pradesh), the AI anchors all responses to relevant state assembly dates and specific local registration requirements.
 
-* **Frontend Framework:** Next.js 14 (App Router) with React & TypeScript.
-* **UI/UX & Physics:** Tailwind CSS & Framer Motion. Features an ultra-premium "Opal Glass" 3D aesthetic, interactive mouse-tracking, and a sleek 4-step dynamic onboarding modal (State, Age, Gender, Sector).
-* **Backend Pipeline:** Next.js Serverless API Routes (`/api/decode`, `/api/match`, & `/api/debunker`) wrapped in bulletproof try/catch blocks with aggressive Markdown stripping and JSON fallback arrays to prevent LLM hallucination crashes.
-* **The AI Engine:** Google Generative AI (Gemini Flash) strictly prompted to act as a localized civic educator. Prompts are aggressively tuned to inject the user's exact demographic context.
-* **The "Civic Cache" (Database):** Supabase (PostgreSQL). Secured via Service Role bypassing client-side RLS.
+### 🎙️ Bilingual Voice Engine (Web Speech API)
+Real-world civic tools must be accessible. Election.jr features a native two-way voice interface.
+* **STT (Speech-to-Text):** Users can ask questions in Telugu or English.
+* **TTS (Text-to-Speech):** The AI responds using regional voice synthesis (Google తెలుగు) to ensure literacy is not a barrier to civic participation.
 
-### ⚡ The 0ms Latency Data Flow
-To drastically reduce API costs and load times, we implemented a custom **SHA-256 Hashing Engine**:
-1. User submits manifesto text.
-2. The Node.js `crypto` module generates a unique SHA-256 hash of the exact string.
-3. The backend queries the Supabase `election_cache` table via an indexed lookup.
-4. **Cache Hit:** Returns the stored JSON payload instantly (0ms latency).
-5. **Cache Miss:** Pings Gemini, sanitizes the response, stores the new hash/JSON pair in Supabase, and renders the UI.
+### ⚡ Performance & Efficiency (SHA-256 Caching)
+To minimize LLM latency and API costs, we implemented a Supabase-backed caching layer. Complex manifesto decodes are hashed using SHA-256. Repeated queries result in 0ms latency, providing a snappy, "app-like" experience.
+
+### 🛡️ Enterprise-Grade Security
+* **Zero-Trust Validation:** All API routes strictly validate environment variables.
+* **Safe Parsing:** Custom regex-based markdown stripping ensures that Gemini’s JSON outputs are sanitized before frontend rendering, preventing UI crashes.
+
+---
+
+## 🛠️ Technical Stack
+
+| Category | Technology |
+| :--- | :--- |
+| **Frontend** | Next.js 14 (App Router), Tailwind CSS, Framer Motion |
+| **AI Brain** | Google Gemini 1.5 Flash (@google/generative-ai) |
+| **Backend/DB** | Supabase (PostgreSQL) for Result Caching |
+| **Infrastructure** | Google Cloud Run (Deployed in asia-south1 Mumbai) |
+| **Voice** | Native Browser Web Speech API (Regional Support) |
+
+---
+
+## 🧪 Testing & QA
+
+We don't just "hope" it works; we verify it. The repository includes a dedicated `/tests` suite using Jest:
+* **Parser Tests:** Validates the regex logic for extracting clean JSON from AI markdown.
+* **API Mocks:** Simulates Gemini SDK responses to ensure the frontend handles 500/429 errors gracefully without crashing the user's session.
+
+---
+
+## 🏁 Submission Details
+
+* **Project Name:** Election.jr
+* **Developer:** Eti Muni Manas
+* **Deployment Region:** Mumbai, India (asia-south1)
+* **GitHub Repository:** [https://github.com/manaseti03-svg/election.jr](https://github.com/manaseti03-svg/election.jr)
 
 ---
 
@@ -55,6 +58,12 @@ To drastically reduce API costs and load times, we implemented a custom **SHA-25
 
 First, set up your `.env.local` file with the required keys (ensure this file is git-ignored):
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url=
-SUPABASE_SERVICE_ROLE_KEY=your_service_key=
-GOOGLE_GENAI_API_KEY=your_gemini_key=
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_key
+GOOGLE_GENAI_API_KEY=your_gemini_key
+```
+
+Run the development server:
+```bash
+npm run dev
+```
