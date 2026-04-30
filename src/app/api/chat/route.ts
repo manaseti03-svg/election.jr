@@ -22,6 +22,9 @@ export async function POST(req: Request) {
 
     const { location, ageGroup, gender, sector } = voterProfile;
 
+    const today = new Date().toDateString();
+    const currentYear = new Date().getFullYear();
+
     const historyText = chatHistory.map((msg: any) => `${msg.role}: ${msg.content_english}`).join('\n');
 
     const prompt = `You are Election.jr, a Troubleshooting Expert and Civic Guide. The user (${gender}, ${ageGroup}, ${sector}, ${location}) is currently looking at the '${currentTab}' section of the app.
@@ -32,6 +35,8 @@ If Decoder (Policies): Clarify complex economic/political terms.
 If Fact Check (Debunker): Answer questions about misinformation.
 
 Automatically translate your ENTIRE English answer into the primary regional language of ${location}.
+
+CRITICAL TEMPORAL CONTEXT: Today's date is ${today}. The current year is ${currentYear}. You MUST NOT refer to 2024 or 2025 as future events. The 2024 Lok Sabha and Andhra Pradesh Assembly elections have already concluded. If asked about the "next" elections, inform the user that the next major general/assembly elections are expected in 2029, though local body elections may occur sooner. Anchor all your advice in the present reality of ${currentYear}.
 
 Return STRICTLY as a JSON object with these 3 keys:
 1. english_response (string)
