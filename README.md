@@ -24,6 +24,11 @@ A "Tinder-style" gamified swipe interface. Instead of static content, the engine
 ### 3. The WhatsApp Debunker (Live)
 An AI verification tool built to cross-reference viral political rumors against verified facts. By piping the user's exact 4-part Voter Profile (Location, Age, Gender, Sector) into the prompt, the AI generates a `truth_score` and dynamic verdict colors, while explicitly detailing the **Targeting Motive**—explaining *why* this specific demographic was targeted by the misinformation.
 
+### 4. Context-Aware Floating Sherpa (Two-Way Voice)
+A globally persistent, Agentic UI Assistant sitting at the bottom right of the screen. Powered by a dynamic prompt, it detects exactly which tab the user is viewing and adjusts its persona (e.g., explaining ideologies in Match, or debugging edge cases in Guide).
+* **Agentic Workflows:** Actively guides users through Form 6 registration via 1-click 'Suggested Action' micro-steps, ending with a deep-link ECI handoff.
+* **Two-Way Voice Engine:** Features native Web Speech API integration. Users can talk to the bot via the Microphone (STT), and the bot responds using a bulletproof Text-to-Speech (TTS) engine that forcefully maps the correct OS regional voice to provide flawless bilingual audio in the user's native language.
+
 ---
 
 ## 🏗️ Technical Architecture & System Design

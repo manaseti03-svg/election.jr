@@ -7,6 +7,7 @@ import { AnimatePresence } from 'framer-motion';
 import BlindMatch, { VoterProfile } from '@/components/BlindMatch';
 import Debunker from '@/components/Debunker';
 import ProcessAssistant from '@/components/ProcessAssistant';
+import FloatingSherpa from '@/components/FloatingSherpa';
 
 const LOADING_FACTS = [
   'Analyzing policies...',
@@ -506,6 +507,8 @@ export default function Home() {
 
       {activeView === 'guide' && <ProcessAssistant voterProfile={voterProfile} />}
     </main>
+    
+    <FloatingSherpa voterProfile={voterProfile} activeView={activeView} />
     </div>
   );
 }
