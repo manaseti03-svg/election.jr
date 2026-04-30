@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, ExternalLink, Search, Send, Volume2, VolumeX,
   CalendarCheck, Clock, AlertTriangle, CheckCircle2, 
-  MessageCircle, Globe, Landmark
+  MessageCircle, Globe, Landmark, FileText, MousePointerClick, Bookmark
 } from 'lucide-react';
 import { VoterProfile } from './BlindMatch';
 
@@ -42,6 +42,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [activeHighlight, setActiveHighlight] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // ── Fetch Timeline on Mount ──
@@ -105,6 +106,11 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
         language_name: data.language_name,
         lang_code: data.lang_code
       }]);
+
+      if (data.ui_action) {
+        setActiveHighlight(data.ui_action);
+        setTimeout(() => setActiveHighlight(null), 4000);
+      }
     } catch (err: any) {
       setChatMessages(prev => [...prev, {
         role: 'assistant',
@@ -137,7 +143,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.12 } }
   };
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 25 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
@@ -176,31 +182,68 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-200/30 rounded-full blur-[80px] pointer-events-none" />
 
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                    <CalendarCheck className="w-5 h-5 text-white" />
-                  </div>
-                  Your Path to the Booth
-                </h2>
-                <p className="text-slate-500 font-medium mt-1 ml-[52px]">
-                  Registration steps & deadlines for {voterProfile?.location || 'your state'}
-                </p>
+            <div className="flex flex-col mb-8 gap-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                      <CalendarCheck className="w-5 h-5 text-white" />
+                    </div>
+                    Your Path to the Booth
+                  </h2>
+                  <p className="text-slate-500 font-medium mt-1 ml-[52px]">
+                    Registration steps & deadlines for {voterProfile?.location || 'your state'}
+                  </p>
+                </div>
               </div>
 
-              {/* Voter ID Portal Button */}
-              <a
-                href="https://voters.eci.gov.in/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative group/glow flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              {/* Pre-Flight Checklist */}
+              <div className="ml-[52px] bg-white/60 backdrop-blur-md border border-white rounded-2xl p-6 shadow-sm mt-4">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <FileText className="text-blue-600 w-5 h-5" />
+                  Before you click: How to use the ECI Portal
+                </h3>
+                <ul className="space-y-4">
+                  <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                    <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                    <span><strong className="text-blue-950">Gather Documents:</strong> Have a scanned copy of your Aadhaar card and a recent passport-size photo ready on your device.</span>
+                  </li>
+                  <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                    <MousePointerClick className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                    <span><strong className="text-blue-950">Find Form 6:</strong> Once on the portal, locate and click the option for 'New Voter Registration (Form 6)'.</span>
+                  </li>
+                  <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
+                    <Bookmark className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                    <span><strong className="text-blue-950">Track Your EPIC:</strong> After submitting, you will get a reference ID. Save it to track when your Voter ID is approved.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Voter ID Portal Button (Agentic UI Highlight Target) */}
+              <motion.div
+                animate={
+                  activeHighlight === 'HIGHLIGHT_REGISTER' 
+                    ? { scale: [1, 1.05, 1], boxShadow: ["0px 0px 0px rgba(16,185,129,0)", "0px 0px 20px rgba(16,185,129,0.8)", "0px 0px 0px rgba(16,185,129,0)"] }
+                    : { scale: 1, boxShadow: "0px 0px 0px rgba(16,185,129,0)" }
+                }
+                transition={
+                  activeHighlight === 'HIGHLIGHT_REGISTER' 
+                    ? { repeat: 3, duration: 1.5, ease: "easeInOut" } 
+                    : { duration: 0.2 }
+                }
+                className="rounded-2xl md:ml-[52px] mt-2"
               >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 blur-md opacity-0 group-hover/glow:opacity-40 transition-opacity -z-10" />
-                <Landmark size={18} />
-                Apply for Voter ID (Form 6)
-                <ExternalLink size={14} />
-              </a>
+                <a
+                  href="https://voters.eci.gov.in/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative group/glow inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0 w-full md:w-auto"
+                >
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 blur-md opacity-0 group-hover/glow:opacity-40 transition-opacity -z-10" />
+                  <Landmark size={18} />
+                  I have my documents. Proceed to Official ECI Portal ↗
+                </a>
+              </motion.div>
             </div>
 
             {/* Timeline Nodes */}
@@ -282,7 +325,19 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Your EPIC (Voter ID) Number</label>
-                <div className="relative">
+                <motion.div 
+                  className="relative rounded-xl"
+                  animate={
+                    activeHighlight === 'HIGHLIGHT_EPIC' 
+                      ? { scale: [1, 1.02, 1], boxShadow: ["0px 0px 0px rgba(59,130,246,0)", "0px 0px 20px rgba(59,130,246,0.8)", "0px 0px 0px rgba(59,130,246,0)"] }
+                      : { scale: 1, boxShadow: "0px 0px 0px rgba(59,130,246,0)" }
+                  }
+                  transition={
+                    activeHighlight === 'HIGHLIGHT_EPIC' 
+                      ? { repeat: 3, duration: 1.5, ease: "easeInOut" } 
+                      : { duration: 0.2 }
+                  }
+                >
                   <input
                     type="text"
                     value={epicNumber}
@@ -292,7 +347,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
                     className="w-full bg-white/50 border border-white rounded-xl p-4 pl-11 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all shadow-inner backdrop-blur-md font-mono font-bold tracking-wider uppercase"
                   />
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                </div>
+                </motion.div>
               </div>
 
               <a

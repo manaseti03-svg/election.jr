@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { Check, X, Trophy } from 'lucide-react';
+import { Check, X, Trophy, Scale, Landmark, Users, Globe, Newspaper, Gavel } from 'lucide-react';
 
 type Party = 'Progressive' | 'Conservative' | 'Libertarian' | 'Centrist';
 
@@ -30,9 +30,10 @@ export interface VoterProfile {
 
 interface BlindMatchProps {
   voterProfile: VoterProfile | null;
+  preloadedPolicies?: Policy[] | null;
 }
 
-export default function BlindMatch({ voterProfile }: BlindMatchProps) {
+export default function BlindMatch({ voterProfile, preloadedPolicies }: BlindMatchProps) {
   const [cards, setCards] = useState<Policy[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,45 +47,34 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
   });
 
   useEffect(() => {
-    async function fetchPolicies() {
-      if (!voterProfile || !voterProfile.location) return;
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/match', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ voterProfile })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch local policies');
-        }
-
-        const data = await response.json();
-        // Reset scores dynamically based on the fetched policies if needed, 
-        // or just keep tracking them. Ensure we catch new alignments.
-        setCards(data);
-        setScores({ Progressive: 0, Conservative: 0, Libertarian: 0, Centrist: 0, Regional: 0, Other: 0 });
-      } catch (err: any) {
-        setError(err.message || "Failed to load policies for your region.");
-        setCards(INITIAL_POLICIES); // fallback
-      } finally {
-        setIsLoading(false);
+    if (preloadedPolicies) {
+      if (preloadedPolicies.length > 0) {
+        setCards(preloadedPolicies);
+      } else {
+        setCards(INITIAL_POLICIES); // Fallback if API returned empty
       }
+      setScores({ Progressive: 0, Conservative: 0, Libertarian: 0, Centrist: 0, Regional: 0, Other: 0 });
     }
+  }, [preloadedPolicies]);
 
-    fetchPolicies();
-  }, [voterProfile]);
+  // If preloadedPolicies is null, it means the background fetch is still running
+  const isFetching = !preloadedPolicies;
 
   const activeCardIndex = cards.length - 1;
   const isFinished = cards.length === 0;
 
   // Physics values for the top card
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-10, 10]);
+  const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+
+  // Dynamic Stamps opacity
+  const agreeOpacity = useTransform(x, [0, 100], [0, 1]);
+  const disagreeOpacity = useTransform(x, [0, -100], [0, 1]);
+
+  // Center Feedback Icons opacity
+  const tickOpacity = useTransform(x, [0, 50, 100], [0, 0, 1]);
+  const crossOpacity = useTransform(x, [0, -50, -100], [0, 0, 1]);
 
   // Color overlays for swipe feedback
   const backgroundRight = useTransform(x, [0, 100], ['rgba(34, 197, 94, 0)', 'rgba(34, 197, 94, 0.2)']);
@@ -161,7 +151,28 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
 
       <div className="relative w-full h-[400px] flex justify-center items-center">
 
-        {isLoading && (
+        {/* ════ Ambient Democracy Background ════ */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-3xl z-0">
+          {/* Subtle Indian Flag Orbs */}
+          <div className="absolute top-0 right-10 w-64 h-64 bg-orange-500 rounded-full blur-[100px] opacity-10" />
+          <div className="absolute bottom-0 left-10 w-64 h-64 bg-green-500 rounded-full blur-[100px] opacity-10" />
+          
+          {/* Floating Icons */}
+          <motion.div animate={{ y: [0, -30, 0], rotate: [0, 10, -10, 0] }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }} className="absolute top-10 left-10 opacity-10 blur-sm">
+            <Scale size={120} className="text-slate-500" />
+          </motion.div>
+          <motion.div animate={{ y: [0, 40, 0], rotate: [0, -15, 10, 0] }} transition={{ duration: 22, repeat: Infinity, ease: "linear" }} className="absolute bottom-10 right-10 opacity-5 blur-sm">
+            <Landmark size={120} className="text-slate-500" />
+          </motion.div>
+          <motion.div animate={{ y: [0, -20, 0], rotate: [0, 5, -5, 0] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute top-1/2 left-1/4 opacity-[0.03] blur-sm">
+            <Users size={120} className="text-blue-500" />
+          </motion.div>
+          <motion.div animate={{ y: [0, 25, 0], rotate: [0, -8, 8, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute top-1/4 right-1/4 opacity-[0.04] blur-sm">
+            <Gavel size={120} className="text-slate-500" />
+          </motion.div>
+        </div>
+
+        {isFetching && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-50">
             <motion.div
               animate={{ rotate: 360 }}
@@ -173,13 +184,13 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
         )}
 
         <AnimatePresence>
-          {!isLoading && cards.length > 0 && cards.map((policy, index) => {
+          {!isFetching && cards.length > 0 && cards.map((policy, index) => {
             const isTop = index === activeCardIndex;
 
             return (
               <motion.div
                 key={policy.id}
-                className="absolute w-full max-w-sm"
+                className="absolute w-full max-w-md"
                 style={{
                   zIndex: index,
                   x: isTop ? x : 0,
@@ -196,7 +207,25 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
                 transition={isTop ? { type: "spring", stiffness: 300, damping: 20 } : { duration: 0.2 }}
               >
                 {/* Opal Glass Card Structure */}
-                <div className="bg-white/70 backdrop-blur-2xl border-2 border-white rounded-[2.5rem] p-8 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] h-[360px] flex flex-col justify-center items-center text-center relative overflow-hidden group cursor-grab">
+                <div className="w-full max-w-md min-h-[420px] aspect-[3/4] md:aspect-auto flex flex-col justify-center bg-white/80 backdrop-blur-3xl rounded-[2rem] border-2 border-white/50 shadow-2xl p-8 relative overflow-hidden group cursor-grab">
+
+                  {/* Dynamic Swipe Stamps */}
+                  {isTop && (
+                    <>
+                      <motion.div 
+                        style={{ opacity: agreeOpacity }}
+                        className="absolute top-8 left-8 border-4 border-green-500 text-green-500 font-black text-3xl uppercase tracking-widest px-4 py-1 rounded-lg transform rotate-12 z-50 pointer-events-none"
+                      >
+                        AGREE
+                      </motion.div>
+                      <motion.div 
+                        style={{ opacity: disagreeOpacity }}
+                        className="absolute top-8 right-8 border-4 border-red-500 text-red-500 font-black text-3xl uppercase tracking-widest px-4 py-1 rounded-lg transform -rotate-12 z-50 pointer-events-none"
+                      >
+                        DISAGREE
+                      </motion.div>
+                    </>
+                  )}
 
                   {/* Green Glow Overlay (Agree) */}
                   {isTop && (
@@ -204,7 +233,7 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
                       className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center"
                       style={{ backgroundColor: backgroundRight }}
                     >
-                      <motion.div style={{ scale: iconScaleRight, opacity: iconScaleRight }}>
+                      <motion.div className="absolute inset-0 m-auto flex items-center justify-center" style={{ scale: iconScaleRight, opacity: tickOpacity }}>
                         <Check className="text-green-500 w-24 h-24 drop-shadow-lg" />
                       </motion.div>
                     </motion.div>
@@ -216,18 +245,23 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
                       className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center"
                       style={{ backgroundColor: backgroundLeft }}
                     >
-                      <motion.div style={{ scale: iconScaleLeft, opacity: iconScaleLeft }}>
+                      <motion.div className="absolute inset-0 m-auto flex items-center justify-center" style={{ scale: iconScaleLeft, opacity: crossOpacity }}>
                         <X className="text-red-500 w-24 h-24 drop-shadow-lg" />
                       </motion.div>
                     </motion.div>
                   )}
 
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600 font-bold shadow-inner">
+                  {/* Ideology Badge Pinned to Top */}
+                  <div className="absolute top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold shadow-inner z-30">
                     {cards.length}
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-800 leading-snug">
-                    "{policy.text}"
-                  </h3>
+
+                  {/* Scrollable Typography Container */}
+                  <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent flex items-center mt-16 mb-12">
+                    <h3 className="text-xl md:text-2xl text-slate-800 font-bold leading-relaxed text-center w-full">
+                      "{policy.text}"
+                    </h3>
+                  </div>
 
                   <div className="absolute bottom-6 flex justify-between w-full px-12 text-sm font-bold tracking-widest text-slate-400 uppercase z-20">
                     <button
@@ -250,7 +284,7 @@ export default function BlindMatch({ voterProfile }: BlindMatchProps) {
         </AnimatePresence>
 
         {/* Results Dashboard */}
-        {!isLoading && isFinished && cards.length === 0 && (
+        {!isFetching && isFinished && cards.length === 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

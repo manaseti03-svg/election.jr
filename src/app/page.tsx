@@ -26,6 +26,7 @@ const STATES = [
 export default function Home() {
   const [activeView, setActiveView] = useState('guide');
   const [voterProfile, setVoterProfile] = useState<VoterProfile | null>(null);
+  const [preloadedPolicies, setPreloadedPolicies] = useState<any>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(true);
   
   const [tempProfile, setTempProfile] = useState({
@@ -160,7 +161,7 @@ export default function Home() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
@@ -292,6 +293,18 @@ export default function Home() {
                     if (tempProfile.location && tempProfile.ageGroup && tempProfile.gender && tempProfile.sector) {
                       setVoterProfile(tempProfile);
                       setIsLocationModalOpen(false);
+                      
+                      // Silent Pre-fetch Engine
+                      fetch('/api/match', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ voterProfile: tempProfile })
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                        if (Array.isArray(data)) setPreloadedPolicies(data);
+                      })
+                      .catch(err => console.error("Silent prefetch failed:", err));
                     }
                   }}
                   disabled={!(tempProfile.location && tempProfile.ageGroup && tempProfile.gender && tempProfile.sector)}
@@ -487,7 +500,7 @@ export default function Home() {
         </div>
       )}
 
-      {activeView === 'match' && <BlindMatch voterProfile={voterProfile} />}
+      {activeView === 'match' && <BlindMatch voterProfile={voterProfile} preloadedPolicies={preloadedPolicies} />}
 
       {activeView === 'debunker' && <Debunker voterProfile={voterProfile} />}
 
