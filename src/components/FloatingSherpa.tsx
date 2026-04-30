@@ -160,12 +160,13 @@ export default function FloatingSherpa({ voterProfile, activeView }: FloatingShe
       {/* Expanded Chat Window */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <motion.aside
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="fixed bottom-6 right-6 z-50 w-full max-w-sm sm:max-w-md h-[550px] bg-white/80 backdrop-blur-2xl border border-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden"
+            aria-label="Chat assistant window"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-cyan-500 to-blue-500 p-4 flex items-center justify-between text-white shrink-0">
@@ -180,7 +181,8 @@ export default function FloatingSherpa({ voterProfile, activeView }: FloatingShe
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors"
+                aria-label="Close chat window"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors focus:ring-2 focus:ring-white outline-none"
               >
                 <X size={20} />
               </button>
@@ -209,7 +211,8 @@ export default function FloatingSherpa({ voterProfile, activeView }: FloatingShe
                     {msg.role === 'assistant' && msg.content_regional && (
                       <button
                         onClick={() => handleListen(msg.content_regional!, msg.lang_code || 'hi-IN')}
-                        className="mt-2 flex items-center gap-1.5 text-xs font-bold text-cyan-600 hover:text-cyan-800 transition-colors"
+                        aria-label="Listen to regional translation"
+                        className="mt-2 flex items-center gap-1.5 text-xs font-bold text-cyan-600 hover:text-cyan-800 transition-colors focus:ring-2 focus:ring-cyan-500 outline-none rounded p-1"
                       >
                         {isSpeaking ? <VolumeX size={14} /> : <Volume2 size={14} />}
                         {isSpeaking ? 'Stop' : `Listen in ${msg.language_name || 'Regional'}`}
@@ -243,9 +246,10 @@ export default function FloatingSherpa({ voterProfile, activeView }: FloatingShe
               />
               <motion.button
                 onClick={handleMicClick}
+                aria-label="Start Voice Input"
                 animate={isListening ? { scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] } : {}}
                 transition={isListening ? { repeat: Infinity, duration: 1.5 } : {}}
-                className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+                className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all focus:ring-2 focus:ring-red-500 outline-none ${
                   isListening ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -253,13 +257,14 @@ export default function FloatingSherpa({ voterProfile, activeView }: FloatingShe
               </motion.button>
               <button
                 onClick={handleChatSend}
+                aria-label="Send message"
                 disabled={chatLoading || (!chatInput.trim() && !isListening)}
-                className="w-11 h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-11 h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-blue-500 outline-none"
               >
                 <Send size={18} />
               </button>
             </div>
-          </motion.div>
+          </motion.aside>
         )}
       </AnimatePresence>
     </>

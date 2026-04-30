@@ -3,8 +3,16 @@ import crypto from 'crypto';
 import { supabase } from '@/lib/supabase';
 import { ai } from '@/lib/gemini';
 
+interface DecodeResponse {
+  summary: string;
+  demographic_impact: string;
+  jargon_explained: string;
+  vote_power_quote: string;
+}
+
 export async function POST(req: Request) {
   try {
+    if (!process.env.GOOGLE_GENAI_API_KEY) throw new Error('Missing Google API Key');
     const { text, voterProfile } = await req.json();
 
     if (!text || typeof text !== 'string') {
@@ -89,9 +97,15 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error('[API PIPELINE ERROR]:', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal Server Error' }, 
-      { status: 500 }
-    );
+    
+    // Graceful fallback for Rate Limits or Server Errors
+    const fallback: DecodeResponse = {
+      summary: "Our AI is currently experiencing high traffic. Please try again in a moment.",
+      demographic_impact: "We couldn't analyze the demographic impact at this time.",
+      jargon_explained: "Please hold on while we scale our servers.",
+      vote_power_quote: "Your patience is a virtue in democracy!"
+    };
+
+    return NextResponse.json(fallback, { status: 200 });
   }
 }

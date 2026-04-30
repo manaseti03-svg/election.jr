@@ -259,7 +259,7 @@ export default function BlindMatch({ voterProfile, preloadedPolicies }: BlindMat
                   {/* Scrollable Typography Container */}
                   <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent flex items-center mt-16 mb-12">
                     <h3 className="text-xl md:text-2xl text-slate-800 font-bold leading-relaxed text-center w-full">
-                      "{policy.text}"
+                      {policy.text ? `"${policy.text}"` : "Policy data analyzing... Please swipe to continue."}
                     </h3>
                   </div>
 

@@ -8,6 +8,7 @@ import {
   MessageCircle, Globe, Landmark, FileText, MousePointerClick, Bookmark
 } from 'lucide-react';
 import { VoterProfile } from './BlindMatch';
+import ReadinessTracker from './ReadinessTracker';
 
 interface ProcessAssistantProps {
   voterProfile: VoterProfile | null;
@@ -291,6 +292,13 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
               </div>
             </div>
           </div>
+        </motion.div>
+
+        {/* ════════════════════════════════════════════════════════════════
+            SECTION 3: Document Readiness Tracker
+           ════════════════════════════════════════════════════════════════ */}
+        <motion.div variants={itemVariants}>
+          <ReadinessTracker />
         </motion.div>
 
       </motion.div>
