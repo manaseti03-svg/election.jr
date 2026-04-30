@@ -6,6 +6,7 @@ import { FileSearch, Sparkles, AlertCircle, CheckCircle2, Megaphone } from 'luci
 import { AnimatePresence } from 'framer-motion';
 import BlindMatch, { VoterProfile } from '@/components/BlindMatch';
 import Debunker from '@/components/Debunker';
+import ProcessAssistant from '@/components/ProcessAssistant';
 
 const LOADING_FACTS = [
   'Analyzing policies...',
@@ -23,7 +24,7 @@ const STATES = [
 ];
 
 export default function Home() {
-  const [activeView, setActiveView] = useState('decoder');
+  const [activeView, setActiveView] = useState('guide');
   const [voterProfile, setVoterProfile] = useState<VoterProfile | null>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(true);
   
@@ -198,9 +199,10 @@ export default function Home() {
               </div>
             )}
             <div className="hidden md:flex space-x-8 text-sm font-semibold text-slate-500">
-              <span onClick={() => setActiveView('decoder')} className={`cursor-pointer transition-colors ${activeView === 'decoder' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>Decoder</span>
-              <span onClick={() => setActiveView('match')} className={`cursor-pointer transition-colors ${activeView === 'match' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>Match</span>
-              <span onClick={() => setActiveView('debunker')} className={`cursor-pointer transition-colors ${activeView === 'debunker' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>Debunker</span>
+              <span onClick={() => setActiveView('guide')} className={`cursor-pointer transition-colors ${activeView === 'guide' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>1. Action Plan</span>
+              <span onClick={() => setActiveView('match')} className={`cursor-pointer transition-colors ${activeView === 'match' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>2. Ideology</span>
+              <span onClick={() => setActiveView('decoder')} className={`cursor-pointer transition-colors ${activeView === 'decoder' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>3. Policies</span>
+              <span onClick={() => setActiveView('debunker')} className={`cursor-pointer transition-colors ${activeView === 'debunker' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>4. Fact Check</span>
             </div>
           </div>
         </div>
@@ -445,9 +447,19 @@ export default function Home() {
                 <h3 className="text-xs font-extrabold text-cyan-600 mb-3 uppercase tracking-widest flex items-center gap-2">
                   Jargon Decoded
                 </h3>
-                <p className="text-slate-700 leading-relaxed font-medium">
-                  {result.jargon_explained}
-                </p>
+                <div className="text-slate-700 leading-relaxed font-medium">
+                  {typeof result.jargon_explained === 'object' && result.jargon_explained !== null ? (
+                    <ul className="space-y-2">
+                      {Object.entries(result.jargon_explained).map(([key, val]) => (
+                        <li key={key}>
+                          <strong className="text-slate-900">{key}:</strong> {String(val)}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{result.jargon_explained}</p>
+                  )}
+                </div>
               </motion.div>
 
               {/* Voter Power Quote Card */}
@@ -478,6 +490,8 @@ export default function Home() {
       {activeView === 'match' && <BlindMatch voterProfile={voterProfile} />}
 
       {activeView === 'debunker' && <Debunker voterProfile={voterProfile} />}
+
+      {activeView === 'guide' && <ProcessAssistant voterProfile={voterProfile} />}
     </main>
     </div>
   );

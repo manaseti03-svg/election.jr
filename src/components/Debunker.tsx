@@ -249,6 +249,19 @@ export default function Debunker({ voterProfile }: DebunkerProps) {
           </motion.div>
         </motion.div>
       )}
+
+      {/* AI Safety Disclaimer */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="w-full max-w-4xl mt-8 flex items-start gap-2 text-slate-400 text-xs font-medium bg-slate-100/50 rounded-xl p-4 border border-slate-200/50"
+      >
+        <AlertCircle className="w-4 h-4 flex-shrink-0 text-slate-400 mt-0.5" />
+        <p>
+          ⚠️ Election.jr uses AI to generate timelines and fact-checks. Always verify official dates and voting booth locations directly via the Election Commission of India (ECI) portal.
+        </p>
+      </motion.div>
     </div>
   );
 }
