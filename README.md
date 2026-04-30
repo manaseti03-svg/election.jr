@@ -55,6 +55,6 @@ To drastically reduce API costs and load times, we implemented a custom **SHA-25
 
 First, set up your `.env.local` file with the required keys (ensure this file is git-ignored):
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_service_key
-GOOGLE_GENAI_API_KEY=your_gemini_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url=
+SUPABASE_SERVICE_ROLE_KEY=your_service_key=
+GOOGLE_GENAI_API_KEY=your_gemini_key=
