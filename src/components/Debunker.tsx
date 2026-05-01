@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldAlert, ShieldCheck, ShieldQuestion, Sparkles, AlertCircle } from 'lucide-react';
 import { VoterProfile } from './BlindMatch';
 
-interface DebunkerProps {
-  voterProfile: VoterProfile | null;
-}
-
+/**
+ * WhatsApp Rumor Debunker component.
+ * Uses Gemini AI to fact-check political misinformation with demographic context.
+ * @param {DebunkerProps} props - Component properties.
+ * @returns {JSX.Element} The rendered debunker interface.
+ */
 export default function Debunker({ voterProfile }: DebunkerProps) {
   const [rumorText, setRumorText] = useState('');
   const [isLoading, setIsLoading] = useState(false);

@@ -8,6 +8,7 @@ import BlindMatch, { VoterProfile } from '@/components/BlindMatch';
 import Debunker from '@/components/Debunker';
 import ProcessAssistant from '@/components/ProcessAssistant';
 import FloatingSherpa from '@/components/FloatingSherpa';
+import FirebaseAuth from '@/components/FirebaseAuth';
 
 const LOADING_FACTS = [
   'Analyzing policies...',
@@ -24,10 +25,15 @@ const STATES = [
   "Lakshadweep", "Puducherry"
 ];
 
+/**
+ * Main application container for Election.jr.
+ * Handles onboarding, view switching, and global state management.
+ * @returns {JSX.Element} The rendered Home component.
+ */
 export default function Home() {
   const [activeView, setActiveView] = useState('guide');
   const [voterProfile, setVoterProfile] = useState<VoterProfile | null>(null);
-  const [preloadedPolicies, setPreloadedPolicies] = useState<any>(null);
+  const [preloadedPolicies, setPreloadedPolicies] = useState<VoterProfile[] | null>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(true);
   
   const [tempProfile, setTempProfile] = useState({
@@ -38,6 +44,10 @@ export default function Home() {
     voterStatus: ''
   });
 
+  /**
+   * Generates occupation options based on the selected age group.
+   * @returns {string[]} List of sector options.
+   */
   const getSectorOptions = () => {
     switch (tempProfile.ageGroup) {
       case '18-25 (Youth)':
@@ -107,7 +117,7 @@ export default function Home() {
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
 
   useEffect(() => {
-    let interval: any;
+    let interval: NodeJS.Timeout;
     if (isLoading) {
       setLoadingTextIndex(0);
       interval = setInterval(() => {
@@ -117,6 +127,10 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [isLoading]);
 
+  /**
+   * Orchestrates the Gemini AI Manifesto Decoding pipeline.
+   * Includes security sanitization and SHA-256 caching.
+   */
   const handleDecode = async () => {
     if (!manifestoText.trim()) {
       setError("Please paste some text to decode.");
@@ -201,11 +215,14 @@ export default function Home() {
                 📍 {voterProfile.location} | {voterProfile.ageGroup.split(' ')[0]} | {voterProfile.gender.charAt(0)} | {voterProfile.sector}
               </div>
             )}
-            <div className="hidden md:flex space-x-8 text-sm font-semibold text-slate-500">
-              <span onClick={() => setActiveView('guide')} className={`cursor-pointer transition-colors ${activeView === 'guide' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>1. Action Plan</span>
-              <span onClick={() => setActiveView('match')} className={`cursor-pointer transition-colors ${activeView === 'match' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>2. Ideology</span>
-              <span onClick={() => setActiveView('decoder')} className={`cursor-pointer transition-colors ${activeView === 'decoder' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>3. Policies</span>
-              <span onClick={() => setActiveView('debunker')} className={`cursor-pointer transition-colors ${activeView === 'debunker' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>4. Fact Check</span>
+            <div className="hidden md:flex space-x-8 text-sm font-semibold text-slate-500" role="tablist">
+              <span onClick={() => setActiveView('guide')} role="tab" aria-selected={activeView === 'guide'} aria-label="Action Plan Guide" className={`cursor-pointer transition-colors ${activeView === 'guide' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>1. Action Plan</span>
+              <span onClick={() => setActiveView('match')} role="tab" aria-selected={activeView === 'match'} aria-label="Ideology Blind Match" className={`cursor-pointer transition-colors ${activeView === 'match' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>2. Ideology</span>
+              <span onClick={() => setActiveView('decoder')} role="tab" aria-selected={activeView === 'decoder'} aria-label="Manifesto Policy Decoder" className={`cursor-pointer transition-colors ${activeView === 'decoder' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>3. Policies</span>
+              <span onClick={() => setActiveView('debunker')} role="tab" aria-selected={activeView === 'debunker'} aria-label="WhatsApp Forward Debunker" className={`cursor-pointer transition-colors ${activeView === 'debunker' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>4. Fact Check</span>
+            </div>
+            <div className="flex items-center ml-4">
+              <FirebaseAuth />
             </div>
           </div>
         </div>
@@ -341,7 +358,7 @@ export default function Home() {
       <main className={`relative z-20 pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex flex-col items-center ${!voterProfile ? 'blur-sm pointer-events-none' : ''}`}>
 
       {activeView === 'decoder' && (
-        <div className="w-full flex flex-col items-center">
+        <section aria-label="Manifesto Decoder" className="w-full flex flex-col items-center">
           {/* Hero Section */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -519,11 +536,11 @@ export default function Home() {
         </div>
       )}
 
-      {activeView === 'match' && <BlindMatch voterProfile={voterProfile} preloadedPolicies={preloadedPolicies} />}
+      {activeView === 'match' && <section aria-label="Ideology Matcher"><BlindMatch voterProfile={voterProfile} preloadedPolicies={preloadedPolicies} /></section>}
 
-      {activeView === 'debunker' && <Debunker voterProfile={voterProfile} />}
+      {activeView === 'debunker' && <section aria-label="Fact Checker"><Debunker voterProfile={voterProfile} /></section>}
 
-      {activeView === 'guide' && <ProcessAssistant voterProfile={voterProfile} />}
+      {activeView === 'guide' && <section aria-label="Action Plan Guide"><ProcessAssistant voterProfile={voterProfile} /></section>}
     </main>
     
     <FloatingSherpa voterProfile={voterProfile} activeView={activeView} />

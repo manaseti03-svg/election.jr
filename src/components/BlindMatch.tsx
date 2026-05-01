@@ -29,11 +29,12 @@ export interface VoterProfile {
   voterStatus?: string;
 }
 
-interface BlindMatchProps {
-  voterProfile: VoterProfile | null;
-  preloadedPolicies?: Policy[] | null;
-}
-
+/**
+ * Blind Policy Matcher component.
+ * Gamified "swipe" interface for matching user preferences to political ideologies.
+ * @param {BlindMatchProps} props - Component properties.
+ * @returns {JSX.Element} The rendered matcher interface.
+ */
 export default function BlindMatch({ voterProfile, preloadedPolicies }: BlindMatchProps) {
   const [cards, setCards] = useState<Policy[]>([]);
   const [isLoading, setIsLoading] = useState(false);

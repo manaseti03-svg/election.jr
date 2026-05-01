@@ -22,6 +22,12 @@ interface TimelineNode {
   status: string;
 }
 
+/**
+ * Process Assistant component.
+ * Provides a tailored voter registration roadmap and polling booth locator.
+ * @param {ProcessAssistantProps} props - Component properties.
+ * @returns {JSX.Element} The rendered roadmap interface.
+ */
 export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps) {
   // ── Timeline State ──
   const [timeline, setTimeline] = useState<TimelineNode[]>([]);

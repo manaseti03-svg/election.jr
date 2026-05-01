@@ -17,7 +17,7 @@ Real-world civic tools must be accessible. Election.jr features a native two-way
 * **TTS (Text-to-Speech):** The AI responds using regional voice synthesis (Google తెలుగు) to ensure literacy is not a barrier to civic participation.
 
 ### ⚡ Performance & Efficiency (SHA-256 Caching)
-To minimize LLM latency and API costs, we implemented a Supabase-backed caching layer. Complex manifesto decodes are hashed using SHA-256. Repeated queries result in 0ms latency, providing a snappy, "app-like" experience.
+To minimize LLM latency and API costs, we implemented a Firebase Firestore caching layer. Complex manifesto decodes are hashed using SHA-256. Repeated queries result in 0ms latency, providing a snappy, "app-like" experience.
 
 ### 🛡️ Enterprise-Grade Security
 * **Zero-Trust Validation:** All API routes strictly validate environment variables.
@@ -31,7 +31,7 @@ To minimize LLM latency and API costs, we implemented a Supabase-backed caching 
 | :--- | :--- |
 | **Frontend** | Next.js 14 (App Router), Tailwind CSS, Framer Motion |
 | **AI Brain** | Google Gemini 1.5 Flash (@google/generative-ai) |
-| **Backend/DB** | Supabase (PostgreSQL) for Result Caching |
+| **Backend/DB** | Firebase Firestore (NoSQL) for Result Caching |
 | **Infrastructure** | Google Cloud Run (Deployed in asia-south1 Mumbai) |
 | **Voice** | Native Browser Web Speech API (Regional Support) |
 
@@ -42,6 +42,16 @@ To minimize LLM latency and API costs, we implemented a Supabase-backed caching 
 We don't just "hope" it works; we verify it. The repository includes a dedicated `/tests` suite using Jest:
 * **Parser Tests:** Validates the regex logic for extracting clean JSON from AI markdown.
 * **API Mocks:** Simulates Gemini SDK responses to ensure the frontend handles 500/429 errors gracefully without crashing the user's session.
+
+---
+
+## ⚖️ Ethical AI & Alignment
+
+Election.jr is built on the pillars of **Responsible AI**. We recognize that civic data is sensitive, and our architecture reflects a deep commitment to **Inclusive Design**. 
+
+* **Misinformation Mitigation:** Our WhatsApp Debunker doesn't just label news; it explains the logical fallacies and demographic targeting motives behind viral rumors, empowering users to think critically.
+* **Responsible Data Handling:** We utilize a Zero-Trust validation model for all API requests and prioritize local browser-based regional voice synthesis to ensure user privacy.
+* **Scalable Civic Tech:** By utilizing a serverless architecture on Google Cloud Run and highly efficient SHA-256 caching, we've created a framework that is ready to serve millions of voters with minimal overhead.
 
 ---
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ai } from '@/lib/gemini';
 
 interface DecodeResponse {
@@ -24,19 +25,16 @@ export async function POST(req: Request) {
     // Generate SHA-256 hash for Civic Cache
     const hash = crypto.createHash('sha256').update(text).digest('hex');
 
-    // Check Supabase for a cache hit
-    const { data: cachedData, error: cacheError } = await supabase
-      .from('election_cache')
-      .select('response')
-      .eq('hash', hash)
-      .single();
+    // Check Firestore for a cache hit
+    const docRef = doc(db, 'manifesto_cache', hash);
+    const docSnap = await getDoc(docRef);
 
-    if (cachedData && !cacheError) {
-      console.log(`[SUPABASE LOG]: Cache HIT for hash ${hash}`);
-      return NextResponse.json(cachedData.response);
+    if (docSnap.exists()) {
+      console.log(`[FIREBASE LOG]: Cache HIT for hash ${hash}`);
+      return NextResponse.json(docSnap.data().response);
     }
     
-    console.log(`[SUPABASE LOG]: Cache MISS for hash ${hash}. Querying Gemini...`);
+    console.log(`[FIREBASE LOG]: Cache MISS for hash ${hash}. Querying Gemini...`);
 
     const prompt = `
       You are a premier political strategist and legal decoder. The user is a ${gender} ${sector} in the ${ageGroup} demographic from ${location}. Their current voter registration status is '${voterStatus}'. Decode the following political manifesto/policy text into highly accessible, gamified insights. Return strictly as a JSON object with these keys:
@@ -80,15 +78,11 @@ export async function POST(req: Request) {
     }
 
     // Save the new result to the Civic Cache
-    const { error: insertError } = await supabase
-      .from('election_cache')
-      .insert([{ hash, response: jsonResponse }]);
-
-    if (insertError) {
-      console.error("[SUPABASE LOG]: Failed to insert into cache:", insertError);
-      // We don't throw here; we still want to return the result to the user even if cache fails.
-    } else {
-      console.log(`[SUPABASE LOG]: Successfully inserted new response into cache for hash ${hash}`);
+    try {
+      await setDoc(docRef, { hash, response: jsonResponse });
+      console.log(`[FIREBASE LOG]: Successfully inserted new response into cache for hash ${hash}`);
+    } catch (insertError) {
+      console.error("[FIREBASE LOG]: Failed to insert into cache:", insertError);
     }
 
     return NextResponse.json(jsonResponse);

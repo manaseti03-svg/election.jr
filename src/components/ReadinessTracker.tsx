@@ -4,10 +4,17 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Circle, ExternalLink } from 'lucide-react';
 
-interface ReadinessTrackerProps {
-  voterStatus?: string;
+interface ChecklistItem {
+  id: 'item1' | 'item2' | 'item3';
+  label: string;
 }
 
+/**
+ * Readiness Tracker component.
+ * Gamified document checklist for various voter registration statuses.
+ * @param {ReadinessTrackerProps} props - Component properties.
+ * @returns {JSX.Element} The rendered checklist interface.
+ */
 export default function ReadinessTracker({ voterStatus = 'unregistered' }: ReadinessTrackerProps) {
   const [docs, setDocs] = useState({
     item1: false,
@@ -30,7 +37,7 @@ export default function ReadinessTracker({ voterStatus = 'unregistered' }: Readi
   let title = 'Form 6 Pre-Flight Checklist';
   let buttonText = 'Proceed to Official ECI Portal';
   let buttonLink = 'https://voters.eci.gov.in/';
-  let checklist: any[] = [];
+  let checklist: ChecklistItem[] = [];
 
   if (isRegistered) {
     title = 'Voter Roll Verification Checklist';
