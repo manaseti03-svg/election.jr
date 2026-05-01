@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { db } from '@/lib/firebase';
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: "Invalid text input" }, { status: 400 });
     }
-    
+
     const { location, ageGroup, gender, sector, voterStatus = 'unregistered' } = voterProfile || {};
 
     // Generate SHA-256 hash for Civic Cache
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
 
     let resultText = response.text;
     if (!resultText) {
-        throw new Error("No response text received from Gemini.");
+      throw new Error("No response text received from Gemini.");
     }
 
     // Strip markdown formatting if the LLM wrapped the JSON
@@ -92,7 +93,7 @@ export async function POST(req: Request) {
 
   } catch (error: unknown) {
     console.error('[API PIPELINE ERROR]:', error);
-    
+
     // Graceful fallback for Rate Limits or Server Errors
     const fallback: DecodeResponse = {
       summary: "Our AI is currently experiencing high traffic. Please try again in a moment.",
