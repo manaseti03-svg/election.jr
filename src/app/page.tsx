@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, Variants } from 'framer-motion';
 import { FileSearch, Sparkles, AlertCircle, CheckCircle2, Megaphone } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
-import BlindMatch, { VoterProfile } from '@/components/BlindMatch';
+import BlindMatch, { VoterProfile, Policy } from '@/components/BlindMatch';
 import Debunker from '@/components/Debunker';
 import ProcessAssistant from '@/components/ProcessAssistant';
 import FloatingSherpa from '@/components/FloatingSherpa';
@@ -33,7 +33,7 @@ const STATES = [
 export default function Home() {
   const [activeView, setActiveView] = useState('guide');
   const [voterProfile, setVoterProfile] = useState<VoterProfile | null>(null);
-  const [preloadedPolicies, setPreloadedPolicies] = useState<VoterProfile[] | null>(null);
+  const [preloadedPolicies, setPreloadedPolicies] = useState<Policy[] | null>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(true);
   
   const [tempProfile, setTempProfile] = useState({
@@ -152,7 +152,7 @@ export default function Home() {
       const text = await response.text();
       try {
         data = JSON.parse(text);
-      } catch (parseError) {
+      } catch {
         console.error("Failed to parse API response as JSON:", text);
         throw new Error("Server returned an invalid response (not JSON).");
       }
@@ -162,8 +162,8 @@ export default function Home() {
       }
 
       setResult(data);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -177,7 +177,7 @@ export default function Home() {
     }
   };
 
-  const itemVariants: any = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
@@ -199,29 +199,37 @@ export default function Home() {
       />
 
       {/* Navigation Bar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/40 backdrop-blur-xl border-b border-white/60 shadow-sm">
+      <nav className="fixed top-0 w-full z-50 bg-white/40 backdrop-blur-xl border-b border-white/60 shadow-sm overflow-x-auto no-scrollbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(34,211,238,0.3)]">
-                E
+          <div className="flex flex-col md:flex-row justify-between items-center py-2 md:h-16 gap-3">
+            <div className="flex items-center justify-between w-full md:w-auto">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white font-bold shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+                  E
+                </div>
+                <span className="font-bold text-lg md:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600">
+                  Election.jr
+                </span>
               </div>
-              <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600">
-                Election.jr
-              </span>
+              <div className="md:hidden">
+                <FirebaseAuth />
+              </div>
             </div>
+
             {voterProfile && (
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-full border border-blue-100 shadow-sm">
-                📍 {voterProfile.location} | {voterProfile.ageGroup.split(' ')[0]} | {voterProfile.gender.charAt(0)} | {voterProfile.sector}
+              <div className="flex md:hidden items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-full border border-blue-100 overflow-x-auto whitespace-nowrap">
+                📍 {voterProfile.location} | {voterProfile.ageGroup.split(' ')[0]} | {voterProfile.sector}
               </div>
             )}
-            <div className="hidden md:flex space-x-8 text-sm font-semibold text-slate-500" role="tablist">
-              <span onClick={() => setActiveView('guide')} role="tab" aria-selected={activeView === 'guide'} aria-label="Action Plan Guide" className={`cursor-pointer transition-colors ${activeView === 'guide' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>1. Action Plan</span>
-              <span onClick={() => setActiveView('match')} role="tab" aria-selected={activeView === 'match'} aria-label="Ideology Blind Match" className={`cursor-pointer transition-colors ${activeView === 'match' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>2. Ideology</span>
-              <span onClick={() => setActiveView('decoder')} role="tab" aria-selected={activeView === 'decoder'} aria-label="Manifesto Policy Decoder" className={`cursor-pointer transition-colors ${activeView === 'decoder' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>3. Policies</span>
-              <span onClick={() => setActiveView('debunker')} role="tab" aria-selected={activeView === 'debunker'} aria-label="WhatsApp Forward Debunker" className={`cursor-pointer transition-colors ${activeView === 'debunker' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'hover:text-blue-500'}`}>4. Fact Check</span>
+
+            <div className="flex items-center space-x-4 md:space-x-8 text-[11px] md:text-sm font-semibold text-slate-500 w-full md:w-auto justify-center overflow-x-auto pb-1 md:pb-0" role="tablist">
+              <span onClick={() => setActiveView('guide')} role="tab" aria-selected={activeView === 'guide'} className={`cursor-pointer transition-colors whitespace-nowrap ${activeView === 'guide' ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-500'}`}>Action Plan</span>
+              <span onClick={() => setActiveView('match')} role="tab" aria-selected={activeView === 'match'} className={`cursor-pointer transition-colors whitespace-nowrap ${activeView === 'match' ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-500'}`}>Ideology</span>
+              <span onClick={() => setActiveView('decoder')} role="tab" aria-selected={activeView === 'decoder'} className={`cursor-pointer transition-colors whitespace-nowrap ${activeView === 'decoder' ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-500'}`}>Policies</span>
+              <span onClick={() => setActiveView('debunker')} role="tab" aria-selected={activeView === 'debunker'} className={`cursor-pointer transition-colors whitespace-nowrap ${activeView === 'debunker' ? 'text-blue-600 border-b-2 border-blue-600' : 'hover:text-blue-500'}`}>Fact Check</span>
             </div>
-            <div className="flex items-center ml-4">
+
+            <div className="hidden md:flex items-center ml-4">
               <FirebaseAuth />
             </div>
           </div>
@@ -355,7 +363,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className={`relative z-20 pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex flex-col items-center ${!voterProfile ? 'blur-sm pointer-events-none' : ''}`}>
+      <main className={`relative z-20 pt-48 md:pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex flex-col items-center ${!voterProfile ? 'blur-sm h-screen overflow-hidden' : ''}`}>
 
       {activeView === 'decoder' && (
         <section aria-label="Manifesto Decoder" className="w-full flex flex-col items-center">
@@ -470,9 +478,19 @@ export default function Home() {
                 <h3 className="text-sm font-bold text-blue-600 mb-4 flex items-center gap-2 uppercase tracking-widest relative z-10">
                   <CheckCircle2 size={18} /> The Bottom Line
                 </h3>
-                <p className="text-xl md:text-2xl text-slate-800 leading-relaxed font-bold relative z-10">
-                  {result.summary}
-                </p>
+                <div className="text-xl md:text-2xl text-slate-800 leading-relaxed font-bold relative z-10">
+                   {typeof result.summary === 'object' && result.summary !== null ? (
+                    <ul className="space-y-2">
+                      {Object.values(result.summary).map((val, idx) => (
+                        <li key={idx} className="flex gap-2">
+                          <span>•</span> {String(val)}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{String(result.summary)}</p>
+                  )}
+                </div>
               </motion.div>
 
               {/* Impact on Demographic Card */}
@@ -483,9 +501,19 @@ export default function Home() {
                 <h3 className="text-xs font-extrabold text-indigo-500 mb-3 uppercase tracking-widest flex items-center gap-2">
                   How this impacts {voterProfile?.ageGroup.split(' ')[0]} year old {voterProfile?.gender === 'Male' ? 'men' : voterProfile?.gender === 'Female' ? 'women' : 'people'} in {voterProfile?.location}
                 </h3>
-                <p className="text-slate-700 leading-relaxed font-medium">
-                  {result.demographic_impact}
-                </p>
+                <div className="text-slate-700 leading-relaxed font-medium">
+                  {typeof result.demographic_impact === 'object' && result.demographic_impact !== null ? (
+                    <ul className="space-y-3">
+                      {Object.entries(result.demographic_impact).map(([key, val]) => (
+                        <li key={key}>
+                          <strong className="text-slate-900 capitalize">{key.replace(/_/g, ' ')}:</strong> {String(val)}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{String(result.demographic_impact)}</p>
+                  )}
+                </div>
               </motion.div>
 
               {/* Jargon Explained Card */}
@@ -526,14 +554,14 @@ export default function Home() {
                       <Megaphone size={18} className="text-orange-500" /> Your Vote Matters
                     </h3>
                     <p className="text-lg md:text-xl text-slate-700 leading-relaxed font-bold italic">
-                      "{result.vote_power_quote}"
+                      &quot;{result.vote_power_quote}&quot;
                     </p>
                   </div>
                 </motion.div>
               )}
             </motion.div>
           )}
-        </div>
+        </section>
       )}
 
       {activeView === 'match' && <section aria-label="Ideology Matcher"><BlindMatch voterProfile={voterProfile} preloadedPolicies={preloadedPolicies} /></section>}

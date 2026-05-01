@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       }
     });
 
-    let resultText = response.text;
+    const resultText = response.text;
     if (!resultText) {
       throw new Error("No response text received from Gemini.");
     }
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     try {
       jsonResponse = JSON.parse(cleanedText);
       if (!Array.isArray(jsonResponse)) throw new Error("Not an array");
-    } catch (parseErr) {
+    } catch {
       console.error("[JSON PARSE ERROR]: Raw text from Gemini:", resultText);
       const FALLBACK_TIMELINE = [
         { id: 1, title: "Check Electoral Roll Status", description: "Verify your name on the latest voter list at nvsp.in.", date: "Ongoing", status: "action_needed" },
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(jsonResponse);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API PIPELINE ERROR]:', error);
     const FALLBACK_TIMELINE: TimelineEvent[] = [
       { id: 1, title: "Check Electoral Roll Status", description: "Verify your name on the latest voter list at nvsp.in.", date: "Ongoing", status: "action_needed" },

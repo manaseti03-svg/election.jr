@@ -83,7 +83,7 @@ export default function FloatingSherpa({ voterProfile, activeView }: FloatingShe
         language_name: data.language_name,
         lang_code: data.lang_code
       }]);
-    } catch (err: any) {
+    } catch {
       setChatMessages(prev => [...prev, {
         role: 'assistant',
         content_english: "Sorry, I couldn't process that right now. Please try again."
@@ -121,6 +121,7 @@ export default function FloatingSherpa({ voterProfile, activeView }: FloatingShe
   };
 
   const handleMicClick = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return alert('Your browser does not support voice input.');
     
@@ -129,6 +130,7 @@ export default function FloatingSherpa({ voterProfile, activeView }: FloatingShe
     recognition.interimResults = false;
     
     recognition.onstart = () => setIsListening(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setChatInput(transcript); // Put the spoken words into the input box

@@ -53,14 +53,14 @@ export async function POST(req: Request) {
     let jsonResponse;
     try {
       jsonResponse = JSON.parse(resultText);
-    } catch (parseErr) {
+    } catch {
       console.error("[JSON PARSE ERROR]: Raw text from Gemini:", resultText);
       throw new Error("Failed to parse Gemini response as JSON.");
     }
 
     return NextResponse.json(jsonResponse);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API PIPELINE ERROR]:', error);
     
     const fallback: DebunkerResponse = {

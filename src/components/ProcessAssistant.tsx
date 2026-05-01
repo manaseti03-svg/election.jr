@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, Variants } from 'framer-motion';
 import { 
-  MapPin, ExternalLink, Search, Send, Volume2, VolumeX,
+  MapPin, ExternalLink, Search,
   CalendarCheck, Clock, AlertTriangle, CheckCircle2, 
-  MessageCircle, Globe, Landmark, FileText, MousePointerClick, Bookmark
+  Landmark, FileText, MousePointerClick, Bookmark
 } from 'lucide-react';
 import { VoterProfile } from './BlindMatch';
 import ReadinessTracker from './ReadinessTracker';
@@ -36,7 +36,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
   // ── Booth Locator State ──
   const [epicNumber, setEpicNumber] = useState('');
 
-  const [activeHighlight, setActiveHighlight] = useState<string | null>(null);
+  const [activeHighlight] = useState<string | null>(null);
 
   // ── Fetch Timeline on Mount ──
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.12 } }
   };
-  const itemVariants: any = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 25 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
@@ -145,7 +145,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
                       </li>
                       <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
                         <Bookmark className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                        <span><strong className="text-blue-950">Missing from Portal?:</strong> If your EPIC number shows 'No Record Found', your name was deleted. You must register again using Form 6.</span>
+                        <span><strong className="text-blue-950">Missing from Portal?:</strong> If your EPIC number shows &apos;No Record Found&apos;, your name was deleted. You must register again using Form 6.</span>
                       </li>
                     </ul>
                   </>
@@ -179,7 +179,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
                       </li>
                       <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
                         <MousePointerClick className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                        <span><strong className="text-blue-950">Find Form 6:</strong> Once on the portal, locate and click the option for 'New Voter Registration (Form 6)'.</span>
+                        <span><strong className="text-blue-950">Find Form 6:</strong> Once on the portal, locate and click the option for &apos;New Voter Registration (Form 6)&apos;.</span>
                       </li>
                       <li className="flex gap-3 text-blue-900 font-medium text-sm md:text-base">
                         <Bookmark className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
@@ -339,7 +339,7 @@ export default function ProcessAssistant({ voterProfile }: ProcessAssistantProps
               <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-blue-700 font-medium">
-                  This opens the official Election Commission of India's Electoral Search portal. Your EPIC number is on your Voter ID card.
+                  This opens the official Election Commission of India&apos;s Electoral Search portal. Your EPIC number is on your Voter ID card.
                 </p>
               </div>
             </div>

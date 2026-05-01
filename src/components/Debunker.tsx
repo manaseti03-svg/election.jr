@@ -1,9 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { ShieldAlert, ShieldCheck, ShieldQuestion, Sparkles, AlertCircle } from 'lucide-react';
 import { VoterProfile } from './BlindMatch';
+
+interface DebunkerProps {
+  voterProfile: VoterProfile | null;
+}
 
 /**
  * WhatsApp Rumor Debunker component.
@@ -48,7 +52,7 @@ export default function Debunker({ voterProfile }: DebunkerProps) {
       const text = await response.text();
       try {
         data = JSON.parse(text);
-      } catch (parseError) {
+      } catch {
         throw new Error("Server returned an invalid response (not JSON).");
       }
 
@@ -57,8 +61,8 @@ export default function Debunker({ voterProfile }: DebunkerProps) {
       }
 
       setResult(data);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +92,7 @@ export default function Debunker({ voterProfile }: DebunkerProps) {
     }
   };
   
-  const itemVariants: any = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
@@ -245,7 +249,7 @@ export default function Debunker({ voterProfile }: DebunkerProps) {
                  Why it targets you ({voterProfile?.sector || voterProfile?.ageGroup})
                </h3>
                <p className="text-lg md:text-xl text-slate-700 leading-relaxed font-bold italic">
-                 "{result.targeting_motive}"
+                 &quot;{result.targeting_motive}&quot;
                </p>
              </div>
           </motion.div>

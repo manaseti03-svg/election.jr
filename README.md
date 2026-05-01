@@ -37,9 +37,7 @@ To minimize LLM latency and API costs, we implemented a Firebase Firestore cachi
 
 ---
 
-## 🧪 Testing & QA
-
-We don't just "hope" it works; we verify it. The repository includes a dedicated `/tests` suite using Jest:
+We don't just "hope" it works; we verify it. The repository includes a dedicated `/tests` suite using **Vitest**:
 * **Parser Tests:** Validates the regex logic for extracting clean JSON from AI markdown.
 * **API Mocks:** Simulates Gemini SDK responses to ensure the frontend handles 500/429 errors gracefully without crashing the user's session.
 

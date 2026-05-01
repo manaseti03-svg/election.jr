@@ -2,15 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { Check, X, Trophy, Scale, Landmark, Users, Globe, Newspaper, Gavel } from 'lucide-react';
+import { Check, X, Trophy, Scale, Landmark, Users, Gavel } from 'lucide-react';
 
 type Party = 'Progressive' | 'Conservative' | 'Libertarian' | 'Centrist';
 
-interface Policy {
+export interface Policy {
   id: number;
   text: string;
   party?: Party;
   alignment?: string;
+}
+
+export interface BlindMatchProps {
+  voterProfile: VoterProfile | null;
+  preloadedPolicies: Policy[] | null;
 }
 
 const INITIAL_POLICIES: Policy[] = [
@@ -37,8 +42,7 @@ export interface VoterProfile {
  */
 export default function BlindMatch({ voterProfile, preloadedPolicies }: BlindMatchProps) {
   const [cards, setCards] = useState<Policy[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
   const [scores, setScores] = useState<Record<string, number>>({
     Progressive: 0,
     Conservative: 0,
@@ -84,7 +88,7 @@ export default function BlindMatch({ voterProfile, preloadedPolicies }: BlindMat
   const iconScaleRight = useTransform(x, [0, 100], [0.5, 1.2]);
   const iconScaleLeft = useTransform(x, [-100, 0], [1.2, 0.5]);
 
-  const handleDragEnd = (event: any, info: any) => {
+  const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
     const swipeThreshold = 100;
     const isSwipeRight = info.offset.x > swipeThreshold;
     const isSwipeLeft = info.offset.x < -swipeThreshold;
@@ -267,13 +271,13 @@ export default function BlindMatch({ voterProfile, preloadedPolicies }: BlindMat
 
                   <div className="absolute bottom-6 flex justify-between w-full px-12 text-sm font-bold tracking-widest text-slate-400 uppercase z-20">
                     <button
-                      onClick={(e) => { e.stopPropagation(); isTop && triggerSwipeAnimation('left'); }}
+                      onClick={(e) => { e.stopPropagation(); if (isTop) triggerSwipeAnimation('left'); }}
                       className="flex items-center gap-1 hover:text-red-500 transition-colors pointer-events-auto"
                     >
                       <X size={16} /> Disagree
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); isTop && triggerSwipeAnimation('right'); }}
+                      onClick={(e) => { e.stopPropagation(); if (isTop) triggerSwipeAnimation('right'); }}
                       className="flex items-center gap-1 hover:text-green-500 transition-colors pointer-events-auto"
                     >
                       Agree <Check size={16} />
@@ -327,24 +331,21 @@ export default function BlindMatch({ voterProfile, preloadedPolicies }: BlindMat
             </div>
 
             <button
-              onClick={async () => {
-                // To play again, we can just refetch or use initial
-                setIsLoading(true);
-                try {
-                  const response = await fetch('/api/match', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ voterProfile })
-                  });
-                  const data = await response.json();
-                  setCards(data);
-                } catch {
-                  setCards(INITIAL_POLICIES);
-                } finally {
-                  setIsLoading(false);
-                }
-                setScores({ Progressive: 0, Conservative: 0, Libertarian: 0, Centrist: 0, Regional: 0, Other: 0 });
-              }}
+                onClick={async () => {
+                  // To play again, we can just refetch or use initial
+                  try {
+                    const response = await fetch('/api/match', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ voterProfile })
+                    });
+                    const data = await response.json();
+                    setCards(data);
+                  } catch {
+                    setCards(INITIAL_POLICIES);
+                  }
+                  setScores({ Progressive: 0, Conservative: 0, Libertarian: 0, Centrist: 0, Regional: 0, Other: 0 });
+                }}
               className="text-blue-600 font-bold uppercase tracking-widest text-sm hover:text-blue-700 transition-colors"
             >
               Play Again

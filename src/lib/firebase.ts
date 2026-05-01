@@ -21,7 +21,7 @@ export const googleProvider = new GoogleAuthProvider();
 export const db = getFirestore(app);
 
 // Conditionally initialize analytics for SSR compatibility
-export let analytics: any = null;
+export let analytics: unknown = null;
 if (typeof window !== "undefined") {
   isSupported().then((supported) => {
     if (supported) {

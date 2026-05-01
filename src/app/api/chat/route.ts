@@ -7,6 +7,11 @@ interface ChatResponse {
   lang_code: string;
 }
 
+interface ChatMessage {
+  role: string;
+  content_english: string;
+}
+
 export async function POST(req: Request) {
   try {
     if (!process.env.GOOGLE_GENAI_API_KEY) throw new Error('Missing Google API Key');
@@ -25,7 +30,7 @@ export async function POST(req: Request) {
     const today = new Date().toDateString();
     const currentYear = new Date().getFullYear();
 
-    const historyText = chatHistory.map((msg: any) => `${msg.role}: ${msg.content_english}`).join('\n');
+    const historyText = chatHistory.map((msg: ChatMessage) => `${msg.role}: ${msg.content_english}`).join('\n');
 
     const prompt = `You are Election.jr, a Troubleshooting Expert and Civic Guide. The user (${gender}, ${ageGroup}, ${sector}, ${location}) is currently looking at the '${currentTab}' section of the app. Their current voter registration status is '${voterStatus}'.
 
@@ -66,14 +71,14 @@ User's response/question: "${question}"`;
     let jsonResponse;
     try {
       jsonResponse = JSON.parse(resultText);
-    } catch (parseErr) {
+    } catch {
       console.error("[JSON PARSE ERROR]: Raw text from Gemini:", resultText);
       throw new Error("Failed to parse Gemini response as JSON.");
     }
 
     return NextResponse.json(jsonResponse);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API PIPELINE ERROR]:', error);
     
     const fallback: ChatResponse = {

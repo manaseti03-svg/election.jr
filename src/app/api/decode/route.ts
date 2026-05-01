@@ -24,17 +24,20 @@ export async function POST(req: Request) {
 
     // Generate SHA-256 hash for Civic Cache
     const hash = crypto.createHash('sha256').update(text).digest('hex');
-
-    // Check Firestore for a cache hit
     const docRef = doc(db, 'manifesto_cache', hash);
-    const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      console.log(`[FIREBASE LOG]: Cache HIT for hash ${hash}`);
-      return NextResponse.json(docSnap.data().response);
+    // Check Firestore for a cache hit with fail-safe
+    try {
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        console.log(`[FIREBASE LOG]: Cache HIT for hash ${hash}`);
+        return NextResponse.json(docSnap.data().response);
+      }
+      console.log(`[FIREBASE LOG]: Cache MISS for hash ${hash}. Querying Gemini...`);
+    } catch (firebaseError) {
+      console.warn(`[FIREBASE FAIL-SAFE]: Firestore unreachable, proceeding with Gemini direct:`, firebaseError);
     }
-    
-    console.log(`[FIREBASE LOG]: Cache MISS for hash ${hash}. Querying Gemini...`);
 
     const prompt = `
       You are a premier political strategist and legal decoder. The user is a ${gender} ${sector} in the ${ageGroup} demographic from ${location}. Their current voter registration status is '${voterStatus}'. Decode the following political manifesto/policy text into highly accessible, gamified insights. Return strictly as a JSON object with these keys:
@@ -72,7 +75,7 @@ export async function POST(req: Request) {
     let jsonResponse;
     try {
       jsonResponse = JSON.parse(resultText);
-    } catch (parseErr) {
+    } catch {
       console.error("[JSON PARSE ERROR]: Raw text from Gemini:", resultText);
       throw new Error("Failed to parse Gemini response as JSON.");
     }
@@ -87,7 +90,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(jsonResponse);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API PIPELINE ERROR]:', error);
     
     // Graceful fallback for Rate Limits or Server Errors
