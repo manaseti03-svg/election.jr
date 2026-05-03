@@ -1,8 +1,21 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { ai } from '@/lib/gemini';
+import { executeCivicTask } from '@/lib/ai-utils';
+import { z } from 'zod';
 
-interface TimelineEvent {
+export const dynamic = 'force-dynamic';
+
+const TimelineRequestSchema = z.object({
+  voterProfile: z.object({
+    location: z.string().min(1).max(50).optional().default("General"),
+    ageGroup: z.string().min(1).max(30).optional().default("General"),
+    gender: z.string().min(1).max(30).optional().default("Not Specified"),
+    sector: z.string().min(1).max(50).optional().default("General Citizen"),
+    voterStatus: z.string().min(1).max(20).optional().default("unregistered")
+  }).optional().default({})
+});
+
+interface TimelineNode {
   id: number;
   title: string;
   description: string;
@@ -12,53 +25,35 @@ interface TimelineEvent {
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.GOOGLE_GENAI_API_KEY) throw new Error('Missing Google API Key');
-    const { voterProfile } = await req.json();
-
-    if (!voterProfile || typeof voterProfile.location !== 'string') {
-      return NextResponse.json({ error: "Invalid voterProfile input" }, { status: 400 });
+    const rawBody = await req.json();
+    const validation = TimelineRequestSchema.safeParse(rawBody);
+    
+    if (!validation.success) {
+      return NextResponse.json({ error: "Invalid request payload", details: validation.error.flatten() }, { status: 400 });
     }
 
-    const { location, ageGroup, voterStatus = 'unregistered' } = voterProfile;
-    const today = new Date().toDateString();
+    const { voterProfile } = validation.data;
+    const { location, ageGroup, voterStatus } = voterProfile;
+    const today = new Date().toISOString().split('T')[0];
 
-    const prompt = `You are an expert on Indian election procedures and the Election Commission of India (ECI). The user is in the ${ageGroup} age group living in ${location}, India. Their current voter registration status is '${voterStatus}'. If they are 'pending', focus the timeline heavily on application processing times, BLO visits, and EPIC generation. If 'registered', focus purely on upcoming election dates and electoral roll verification. If 'unregistered', focus on Form 6 submission windows and new voter deadlines. CRUCIAL: Today's date is ${today}. You MUST NOT generate any dates in the past (e.g., 2024, 2025). All timeline events must be for the upcoming 2026 or 2027 electoral roll revisions, form submission deadlines, and upcoming elections specific to ${location}. Generate exactly 4 upcoming election-related deadlines and voter registration steps that are specifically relevant to this user based on their status of ${voterStatus}. Rule 1: Be specific to the Indian state mentioned. Rule 2: All dates MUST be in the future from ${today}. Rule 3: Keep each step title under 8 words and description under 25 words. Return strictly as a pure JSON array of objects with keys: id (number 1-4), title (string), description (string), date (string like "Jun 2026"), status (string: "upcoming" or "action_needed").`;
+    const prompt = `
+      You are an expert on Indian election procedures and the Election Commission of India (ECI).
+      The user is in the ${ageGroup} group living in ${location}. Status: '${voterStatus}'.
+      Today's date: ${today}.
+      
+      Generate exactly 4 future deadlines or steps for voter registration specific to ${location} and their status.
+      Rule 1: Be specific to the Indian state.
+      Rule 2: All dates MUST be in the future (2026/2027).
+      Rule 3: Return strictly as a JSON array of objects with: { id, title, description, date, status }.
+    `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-      }
-    });
-
-    const resultText = response.text;
-    if (!resultText) {
-      throw new Error("No response text received from Gemini.");
-    }
-
-    const cleanedText = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
-
-    let jsonResponse;
-    try {
-      jsonResponse = JSON.parse(cleanedText);
-      if (!Array.isArray(jsonResponse)) throw new Error("Not an array");
-    } catch {
-      console.error("[JSON PARSE ERROR]: Raw text from Gemini:", resultText);
-      const FALLBACK_TIMELINE = [
-        { id: 1, title: "Check Electoral Roll Status", description: "Verify your name on the latest voter list at nvsp.in.", date: "Ongoing", status: "action_needed" },
-        { id: 2, title: "Submit Form 6 Online", description: "Apply for new Voter ID via the NVSP portal if not registered.", date: "Open Now", status: "action_needed" },
-        { id: 3, title: "Electoral Roll Revision", description: "Annual revision of voter rolls with updated addresses.", date: "Jan 2026", status: "upcoming" },
-        { id: 4, title: "Booth Level Officer Visit", description: "BLO verifies your registration door-to-door before elections.", date: "Pre-Election", status: "upcoming" }
-      ];
-      return NextResponse.json(FALLBACK_TIMELINE);
-    }
+    const jsonResponse = await executeCivicTask<TimelineNode[]>(prompt);
 
     return NextResponse.json(jsonResponse);
 
   } catch (error: unknown) {
-    console.error('[API PIPELINE ERROR]:', error);
-    const FALLBACK_TIMELINE: TimelineEvent[] = [
+    console.error('[TIMELINE API ERROR]:', error);
+    const FALLBACK_TIMELINE: TimelineNode[] = [
       { id: 1, title: "Check Electoral Roll Status", description: "Verify your name on the latest voter list at nvsp.in.", date: "Ongoing", status: "action_needed" },
       { id: 2, title: "Submit Form 6 Online", description: "Apply for new Voter ID via the NVSP portal if not registered.", date: "Open Now", status: "action_needed" },
       { id: 3, title: "Electoral Roll Revision", description: "Annual revision of voter rolls with updated addresses.", date: "Jan 2026", status: "upcoming" },

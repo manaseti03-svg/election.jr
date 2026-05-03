@@ -1,50 +1,36 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 
 // A mock function of what we use in our API routes to strip markdown JSON blocks
-const stripMarkdownJson = (text: string): string => {
-  return text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+const extractStructuredJson = (text: string): any => {
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start !== -1 && end !== -1) {
+      const jsonCandidate = text.substring(start, end + 1);
+      return JSON.parse(jsonCandidate);
+    }
+    throw e;
+  }
 };
 
-describe('Markdown Parser (JSON extraction)', () => {
-  it('should cleanly extract JSON from a markdown code block', () => {
-    const rawGeminiResponse = `
-      Here is the requested analysis:
-      \`\`\`json
-      {
-        "truth_score": 90,
-        "verdict": "True"
-      }
-      \`\`\`
-    `;
-    
-    // We expect the extraction to be parseable JSON
-    const result = stripMarkdownJson(rawGeminiResponse);
-    // Since the regex we use just replaces the backticks, we might still have text before the json block
-    // Wait, the API routes just blindly replace the markdown and call JSON.parse, meaning they assume Gemini outputs ONLY the markdown block.
-    // If Gemini outputs "Here is the requested analysis:\n```json ...", JSON.parse will fail.
-    // Let's test the specific case where the response is JUST the markdown block, which is what we configure the SDK to do with responseMimeType: 'application/json'
-    
-    const strictGeminiResponse = `\`\`\`json
-{
-  "truth_score": 90,
-  "verdict": "True"
-}
-\`\`\``;
-
-    const strictResult = stripMarkdownJson(strictGeminiResponse);
-    
-    expect(() => JSON.parse(strictResult)).not.toThrow();
-    
-    const parsed = JSON.parse(strictResult);
-    expect(parsed.truth_score).toBe(90);
-    expect(parsed.verdict).toBe('True');
+describe('Robust JSON Extraction', () => {
+  it('should extract JSON from a markdown code block', () => {
+    const rawGeminiResponse = "```json\n{\"truth_score\": 90, \"verdict\": \"True\"}\n```";
+    const result = extractStructuredJson(rawGeminiResponse);
+    expect(result.truth_score).toBe(90);
   });
 
-  it('should handle raw JSON without markdown blocks', () => {
+  it('should handle conversational filler around JSON', () => {
+    const rawGeminiResponse = "Sure! Here is the data: {\"status\": \"ok\"}. I hope this helps!";
+    const result = extractStructuredJson(rawGeminiResponse);
+    expect(result.status).toBe('ok');
+  });
+
+  it('should handle raw JSON without blocks', () => {
     const rawJson = `{"status": "ok"}`;
-    const result = stripMarkdownJson(rawJson);
-    
-    expect(result).toBe(rawJson);
-    expect(JSON.parse(result).status).toBe('ok');
+    const result = extractStructuredJson(rawJson);
+    expect(result.status).toBe('ok');
   });
 });

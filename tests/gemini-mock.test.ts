@@ -1,7 +1,7 @@
-import { describe, it, expect, jest } from '@jest/globals';
+import { describe, it, expect, vi } from 'vitest';
 
 // A mock representing the Google Generative AI SDK
-const mockGenerateContent = jest.fn();
+const mockGenerateContent = vi.fn();
 
 const mockAiClient = {
   models: {

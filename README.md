@@ -66,9 +66,14 @@ Election.jr is built on the pillars of **Responsible AI**. We recognize that civ
 
 First, set up your `.env.local` file with the required keys (ensure this file is git-ignored):
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_service_key
 GOOGLE_GENAI_API_KEY=your_gemini_key
+NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_id
 ```
 
 Run the development server:

@@ -1,7 +1,25 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { ai } from '@/lib/gemini';
+import { executeCivicTask } from '@/lib/ai-utils';
+import { z } from 'zod';
 
+/**
+ * Zod Schema for Debunker Request Validation
+ */
+const DebunkerRequestSchema = z.object({
+  text: z.string().min(1).max(5000, "Rumor text too long"),
+  voterProfile: z.object({
+    location: z.string().min(1).max(50).optional().default("General"),
+    ageGroup: z.string().min(1).max(30).optional().default("General"),
+    gender: z.string().min(1).max(30).optional().default("Not Specified"),
+    sector: z.string().min(1).max(50).optional().default("General Citizen"),
+    voterStatus: z.string().min(1).max(20).optional().default("unregistered")
+  }).optional().default({})
+});
+
+/**
+ * Interface representing the structure of the Debunker response.
+ */
 interface DebunkerResponse {
   truth_score: number;
   verdict: string;
@@ -9,60 +27,48 @@ interface DebunkerResponse {
   targeting_motive: string;
 }
 
+/**
+ * POST handler for the WhatsApp Debunker API.
+ * 
+ * @param {Request} req - The incoming Next.js request object.
+ * @returns {Promise<NextResponse>} A JSON response containing the fact-check analysis or a safe fallback.
+ */
 export async function POST(req: Request) {
   try {
-    if (!process.env.GOOGLE_GENAI_API_KEY) throw new Error('Missing Google API Key');
-    const { text, voterProfile } = await req.json();
-
-    if (!text || typeof text !== 'string') {
-      return NextResponse.json({ error: "Invalid text input" }, { status: 400 });
+    const rawBody = await req.json();
+    const validation = DebunkerRequestSchema.safeParse(rawBody);
+    
+    if (!validation.success) {
+      return NextResponse.json({ error: "Invalid request payload", details: validation.error.flatten() }, { status: 400 });
     }
 
-    if (!voterProfile || typeof voterProfile.location !== 'string') {
-      return NextResponse.json({ error: "Invalid voterProfile input" }, { status: 400 });
-    }
+    const { text, voterProfile } = validation.data;
+    const { location, ageGroup, sector } = voterProfile;
 
-    const { location, ageGroup, gender, sector, voterStatus = 'unregistered' } = voterProfile;
-
-    const prompt = `You are a premier political fact-checker. The user has received a suspicious political WhatsApp forward. The user is a ${gender} ${sector} in the ${ageGroup} demographic from ${location}. Their current voter registration status is '${voterStatus}'. Analyze the text. Return strictly as a JSON object with these keys:
-      truth_score (number 0-100)
-      verdict (string: "True", "False", or "Misleading")
-      fact_check (string: 2-3 sentences explaining the actual truth)
-      targeting_motive (string: Explain exactly why this specific demographic was targeted by this rumor).
+    const prompt = `
+      You are an expert fact-checker specializing in Indian political misinformation. 
+      Analyze the following WhatsApp forward/rumor for a user who is a ${sector} from ${location} in the ${ageGroup} group.
       
-      Text to analyze:
+      Return strictly as a JSON object with:
+      {
+        "truth_score": (number 0-100),
+        "verdict": "True | False | Misleading",
+        "fact_check": "A clear, evidence-based explanation",
+        "targeting_motive": "Explain why this rumor specifically targets a ${sector} from ${location} in terms of cognitive bias or local political tension"
+      }
+      
+      Rumor:
       """
       ${text}
-      """`;
+      """
+    `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-      }
-    });
-
-    let resultText = response.text;
-    if (!resultText) {
-        throw new Error("No response text received from Gemini.");
-    }
-
-    // Strip markdown formatting if the LLM wrapped the JSON
-    resultText = resultText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-
-    let jsonResponse;
-    try {
-      jsonResponse = JSON.parse(resultText);
-    } catch {
-      console.error("[JSON PARSE ERROR]: Raw text from Gemini:", resultText);
-      throw new Error("Failed to parse Gemini response as JSON.");
-    }
+    const jsonResponse = await executeCivicTask<DebunkerResponse>(prompt);
 
     return NextResponse.json(jsonResponse);
 
   } catch (error: unknown) {
-    console.error('[API PIPELINE ERROR]:', error);
+    console.error('[DEBUNKER API ERROR]:', error);
     
     const fallback: DebunkerResponse = {
       truth_score: 50,
